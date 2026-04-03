@@ -1,0 +1,409 @@
+{
+  "meta": {
+    "version": "5.0",
+    "generated_at": "2026-04-03T23:19:19.349512",
+    "target_year": 2026,
+    "config": {
+      "data_path": "all_merged_cleaned (new).json",
+      "target_year": 2026,
+      "min_appearances": 2,
+      "min_last_seen_recent": 2020,
+      "recency_tau": 3.0,
+      "min_years_for_trend": 3,
+      "recent_start_year": 2020,
+      "historical_end_year": 2019,
+      "cv_splits": 3,
+      "calibration_method": "isotonic",
+      "top_n": 20,
+      "output_path": "nest2026_predictions.json"
+    },
+    "validation": {
+      "mean_accuracy": 0.6597,
+      "mean_precision": 0.6488,
+      "mean_recall": 0.4774,
+      "mean_f1": 0.5224,
+      "mean_auc": 0.7436,
+      "per_year": [
+        {
+          "year": "2020",
+          "accuracy": 0.7721518987341772,
+          "precision": 0.8717948717948718,
+          "recall": 0.723404255319149,
+          "f1": 0.7906976744186046,
+          "auc": 0.7918882978723405
+        },
+        {
+          "year": "2021",
+          "accuracy": 0.5116279069767442,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "auc": 0.5
+        },
+        {
+          "year": "2022",
+          "accuracy": 0.5232558139534884,
+          "precision": 0.8571428571428571,
+          "recall": 0.23529411764705882,
+          "f1": 0.36923076923076925,
+          "auc": 0.7714285714285714
+        },
+        {
+          "year": "2023",
+          "accuracy": 0.6382978723404256,
+          "precision": 0.8214285714285714,
+          "recall": 0.4423076923076923,
+          "f1": 0.575,
+          "auc": 0.7770146520146521
+        },
+        {
+          "year": "2024",
+          "accuracy": 0.7578947368421053,
+          "precision": 0.6756756756756757,
+          "recall": 0.6944444444444444,
+          "f1": 0.684931506849315,
+          "auc": 0.803436911487759
+        },
+        {
+          "year": "2025",
+          "accuracy": 0.7551020408163265,
+          "precision": 0.6666666666666666,
+          "recall": 0.7692307692307693,
+          "f1": 0.7142857142857143,
+          "auc": 0.8179052585832247
+        }
+      ]
+    },
+    "note": "General section removed. Each subject has exactly 20 questions in NEST 2026."
+  },
+  "predictions": {
+    "Physics": [
+      {
+        "chapter": "Fluid Mechanics",
+        "probability": 0.9286
+      },
+      {
+        "chapter": "Kinematics",
+        "probability": 0.8889
+      },
+      {
+        "chapter": "Oscillations",
+        "probability": 0.8889
+      },
+      {
+        "chapter": "Quantum Mechanics",
+        "probability": 0.8452
+      },
+      {
+        "chapter": "Mechanics",
+        "probability": 0.758
+      },
+      {
+        "chapter": "Thermodynamics",
+        "probability": 0.758
+      },
+      {
+        "chapter": "Optics",
+        "probability": 0.7562
+      },
+      {
+        "chapter": "Electromagnetism",
+        "probability": 0.7536
+      },
+      {
+        "chapter": "Waves",
+        "probability": 0.7479
+      },
+      {
+        "chapter": "Kinetic Theory",
+        "probability": 0.7222
+      },
+      {
+        "chapter": "Electrostatics",
+        "probability": 0.7222
+      },
+      {
+        "chapter": "Nuclear Physics",
+        "probability": 0.7222
+      },
+      {
+        "chapter": "Work, Energy and Power",
+        "probability": 0.7222
+      },
+      {
+        "chapter": "Semiconductors",
+        "probability": 0.7222
+      },
+      {
+        "chapter": "Electromagnetic Waves",
+        "probability": 0.5171
+      },
+      {
+        "chapter": "Astrophysics",
+        "probability": 0.5171
+      },
+      {
+        "chapter": "Statistics",
+        "probability": 0.5171
+      },
+      {
+        "chapter": "Magnetism",
+        "probability": 0.5
+      },
+      {
+        "chapter": "Units and Dimensions",
+        "probability": 0.5
+      },
+      {
+        "chapter": "Gravitation",
+        "probability": 0.2393
+      }
+    ],
+    "Chemistry": [
+      {
+        "chapter": "Chemical Bonding",
+        "probability": 0.5114
+      },
+      {
+        "chapter": "Chemical Kinetics",
+        "probability": 0.5046
+      },
+      {
+        "chapter": "Thermodynamics",
+        "probability": 0.5039
+      },
+      {
+        "chapter": "Electrochemistry",
+        "probability": 0.4921
+      },
+      {
+        "chapter": "Organic Chemistry",
+        "probability": 0.4847
+      },
+      {
+        "chapter": "Solid State",
+        "probability": 0.457
+      },
+      {
+        "chapter": "Acids and Bases",
+        "probability": 0.4559
+      },
+      {
+        "chapter": "p-Block Elements",
+        "probability": 0.4103
+      },
+      {
+        "chapter": "Atomic Structure",
+        "probability": 0.2759
+      },
+      {
+        "chapter": "Chemical Equilibrium",
+        "probability": 0.2741
+      },
+      {
+        "chapter": "General Chemistry",
+        "probability": 0.2547
+      },
+      {
+        "chapter": "Periodic Table",
+        "probability": 0.2547
+      },
+      {
+        "chapter": "Nuclear Chemistry",
+        "probability": 0.2547
+      },
+      {
+        "chapter": "Inorganic Chemistry",
+        "probability": 0.2547
+      },
+      {
+        "chapter": "Metallurgy",
+        "probability": 0.2547
+      },
+      {
+        "chapter": "Coordination Chemistry",
+        "probability": 0.2547
+      },
+      {
+        "chapter": "Biomolecules",
+        "probability": 0.2424
+      },
+      {
+        "chapter": "Analytical Chemistry",
+        "probability": 0.2357
+      },
+      {
+        "chapter": "Periodic Properties",
+        "probability": 0.2357
+      },
+      {
+        "chapter": "Magnetism",
+        "probability": 0.2357
+      }
+    ],
+    "Biology": [
+      {
+        "chapter": "Cell Biology",
+        "probability": 0.5889
+      },
+      {
+        "chapter": "Plant Physiology",
+        "probability": 0.3999
+      },
+      {
+        "chapter": "Ecology",
+        "probability": 0.3717
+      },
+      {
+        "chapter": "Evolutionary Biology",
+        "probability": 0.3717
+      },
+      {
+        "chapter": "Microbiology",
+        "probability": 0.3717
+      },
+      {
+        "chapter": "Human Physiology",
+        "probability": 0.3717
+      },
+      {
+        "chapter": "Cell Division",
+        "probability": 0.3717
+      },
+      {
+        "chapter": "Immunology",
+        "probability": 0.3704
+      },
+      {
+        "chapter": "Plant Reproduction",
+        "probability": 0.3295
+      },
+      {
+        "chapter": "Human Health and Disease",
+        "probability": 0.2976
+      },
+      {
+        "chapter": "Biomolecules",
+        "probability": 0.2976
+      },
+      {
+        "chapter": "Genetics",
+        "probability": 0.2049
+      },
+      {
+        "chapter": "Plant Biology",
+        "probability": 0.1976
+      },
+      {
+        "chapter": "Animal Physiology",
+        "probability": 0.1976
+      },
+      {
+        "chapter": "Molecular Biology",
+        "probability": 0.1976
+      },
+      {
+        "chapter": "Biochemistry",
+        "probability": 0.1976
+      },
+      {
+        "chapter": "Endocrinology",
+        "probability": 0.1976
+      },
+      {
+        "chapter": "Biotechnology",
+        "probability": 0.1976
+      },
+      {
+        "chapter": "Excretory System",
+        "probability": 0.1909
+      },
+      {
+        "chapter": "Neural Control and Coordination",
+        "probability": 0.1909
+      }
+    ],
+    "Mathematics": [
+      {
+        "chapter": "Limits and Continuity",
+        "probability": 0.3859
+      },
+      {
+        "chapter": "Sequences and Series",
+        "probability": 0.3852
+      },
+      {
+        "chapter": "Polynomials",
+        "probability": 0.3681
+      },
+      {
+        "chapter": "Differential Equations",
+        "probability": 0.3381
+      },
+      {
+        "chapter": "Combinatorics",
+        "probability": 0.3381
+      },
+      {
+        "chapter": "Mensuration",
+        "probability": 0.3222
+      },
+      {
+        "chapter": "Geometry",
+        "probability": 0.3222
+      },
+      {
+        "chapter": "Trigonometry",
+        "probability": 0.3222
+      },
+      {
+        "chapter": "Vectors",
+        "probability": 0.3222
+      },
+      {
+        "chapter": "Ellipse",
+        "probability": 0.3215
+      },
+      {
+        "chapter": "Matrices",
+        "probability": 0.3207
+      },
+      {
+        "chapter": "Binomial Theorem",
+        "probability": 0.3135
+      },
+      {
+        "chapter": "Continuity",
+        "probability": 0.3125
+      },
+      {
+        "chapter": "Conic Sections",
+        "probability": 0.2975
+      },
+      {
+        "chapter": "Calculus",
+        "probability": 0.2578
+      },
+      {
+        "chapter": "Functions",
+        "probability": 0.2544
+      },
+      {
+        "chapter": "Complex Numbers",
+        "probability": 0.2528
+      },
+      {
+        "chapter": "Algebra",
+        "probability": 0.2483
+      },
+      {
+        "chapter": "Coordinate Geometry",
+        "probability": 0.2483
+      },
+      {
+        "chapter": "Number Theory",
+        "probability": 0.2476
+      }
+    ]
+  }
+}
