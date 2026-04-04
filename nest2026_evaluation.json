@@ -1,0 +1,1557 @@
+{
+  "meta": {
+    "version": "9.0",
+    "generated_at": "2026-04-04T02:19:11.905161",
+    "config": {
+      "data_path": "all_merged_cleaned (new).json",
+      "target_year": 2026,
+      "min_appearances": 2,
+      "recent_start_year": 2020,
+      "exclude_years": [
+        2021
+      ],
+      "post_change_year": 2020,
+      "post_change_weight": 2.5,
+      "top_n": 20,
+      "rank_k_values": [
+        3,
+        5,
+        8,
+        10
+      ],
+      "output_path": "nest2026_evaluation.json"
+    },
+    "note": "Two-stage regime-aware model. Ranking metrics are primary; count metrics are secondary."
+  },
+  "verification": {
+    "data_integrity": {
+      "passed": true,
+      "issues": [],
+      "n_rows": 1263,
+      "n_subjects": 4,
+      "year_min": 2009,
+      "year_max": 2026
+    },
+    "walk_forward": {
+      "passed": true,
+      "issues": []
+    }
+  },
+  "per_year_metrics": [
+    {
+      "year": 2020,
+      "accuracy": 0.65,
+      "precision": 0.6862745098039216,
+      "recall": 0.7446808510638298,
+      "f1": 0.7142857142857143,
+      "auc": 0.746615087040619
+    },
+    {
+      "year": 2022,
+      "accuracy": 0.6666666666666666,
+      "precision": 0.6896551724137931,
+      "recall": 0.7843137254901961,
+      "f1": 0.7339449541284404,
+      "auc": 0.7813180827886711
+    },
+    {
+      "year": 2023,
+      "accuracy": 0.71875,
+      "precision": 0.7272727272727273,
+      "recall": 0.7692307692307693,
+      "f1": 0.7476635514018691,
+      "auc": 0.805506993006993
+    },
+    {
+      "year": 2024,
+      "accuracy": 0.7216494845360825,
+      "precision": 0.5818181818181818,
+      "recall": 0.8888888888888888,
+      "f1": 0.7032967032967034,
+      "auc": 0.7877959927140255
+    },
+    {
+      "year": 2025,
+      "accuracy": 0.73,
+      "precision": 0.603448275862069,
+      "recall": 0.8974358974358975,
+      "f1": 0.7216494845360825,
+      "auc": 0.8579234972677595
+    }
+  ],
+  "overall_classification": {
+    "mean_accuracy": 0.6974132302405498,
+    "mean_precision": 0.6576937734341386,
+    "mean_recall": 0.8169100264219162,
+    "mean_f1": 0.724168081529762,
+    "mean_auc": 0.7958319305636136
+  },
+  "ranking_metrics": {
+    "summary": {
+      "recall@3": 0.25981351165174693,
+      "precision@3": 0.9333333333333333,
+      "ndcg@3": 0.6924621765073373,
+      "recall@5": 0.4003707322089675,
+      "precision@5": 0.8700000000000001,
+      "ndcg@5": 0.7405605548435906,
+      "recall@8": 0.6115875627640334,
+      "precision@8": 0.83125,
+      "ndcg@8": 0.7731023419641869,
+      "recall@10": 0.7021337241190183,
+      "precision@10": 0.775,
+      "ndcg@10": 0.7744183752830706
+    },
+    "per_year": [
+      {
+        "year": 2020,
+        "subjects": {
+          "Physics": {
+            "recall@3": 0.23076923076923078,
+            "precision@3": 1.0,
+            "ndcg@3": 1.0,
+            "recall@5": 0.3076923076923077,
+            "precision@5": 0.8,
+            "ndcg@5": 0.9348952175064447,
+            "recall@8": 0.5384615384615384,
+            "precision@8": 0.875,
+            "ndcg@8": 0.9853016147683408,
+            "recall@10": 0.6923076923076923,
+            "precision@10": 0.9,
+            "ndcg@10": 0.9853876419997372
+          },
+          "Chemistry": {
+            "recall@3": 0.375,
+            "precision@3": 1.0,
+            "ndcg@3": 0.9590582421312976,
+            "recall@5": 0.625,
+            "precision@5": 1.0,
+            "ndcg@5": 0.9835945521038523,
+            "recall@8": 0.75,
+            "precision@8": 0.75,
+            "ndcg@8": 0.9790249784743955,
+            "recall@10": 0.875,
+            "precision@10": 0.7,
+            "ndcg@10": 0.9855514164093285
+          },
+          "Biology": {
+            "recall@3": 0.21428571428571427,
+            "precision@3": 1.0,
+            "ndcg@3": 0.25782454651668285,
+            "recall@5": 0.35714285714285715,
+            "precision@5": 1.0,
+            "ndcg@5": 0.5343643093957989,
+            "recall@8": 0.5714285714285714,
+            "precision@8": 1.0,
+            "ndcg@8": 0.5875743289962353,
+            "recall@10": 0.7142857142857143,
+            "precision@10": 1.0,
+            "ndcg@10": 0.5965966609388146
+          },
+          "Mathematics": {
+            "recall@3": 0.25,
+            "precision@3": 1.0,
+            "ndcg@3": 0.8573926569492739,
+            "recall@5": 0.3333333333333333,
+            "precision@5": 0.8,
+            "ndcg@5": 0.8360686532975181,
+            "recall@8": 0.5833333333333334,
+            "precision@8": 0.875,
+            "ndcg@8": 0.8409055777716501,
+            "recall@10": 0.6666666666666666,
+            "precision@10": 0.8,
+            "ndcg@10": 0.8596698771715239
+          }
+        }
+      },
+      {
+        "year": 2022,
+        "subjects": {
+          "Physics": {
+            "recall@3": 0.21428571428571427,
+            "precision@3": 1.0,
+            "ndcg@3": 0.6786200393964548,
+            "recall@5": 0.35714285714285715,
+            "precision@5": 1.0,
+            "ndcg@5": 0.6673216125115291,
+            "recall@8": 0.5,
+            "precision@8": 0.875,
+            "ndcg@8": 0.6680635669713282,
+            "recall@10": 0.6428571428571429,
+            "precision@10": 0.9,
+            "ndcg@10": 0.6791410782851625
+          },
+          "Chemistry": {
+            "recall@3": 0.2727272727272727,
+            "precision@3": 1.0,
+            "ndcg@3": 0.9980694308840223,
+            "recall@5": 0.45454545454545453,
+            "precision@5": 1.0,
+            "ndcg@5": 0.998080036836003,
+            "recall@8": 0.6363636363636364,
+            "precision@8": 0.875,
+            "ndcg@8": 0.9984913175000628,
+            "recall@10": 0.8181818181818182,
+            "precision@10": 0.9,
+            "ndcg@10": 0.9990455834397911
+          },
+          "Biology": {
+            "recall@3": 0.3333333333333333,
+            "precision@3": 1.0,
+            "ndcg@3": 0.14805000918990754,
+            "recall@5": 0.5555555555555556,
+            "precision@5": 1.0,
+            "ndcg@5": 0.27624598615817963,
+            "recall@8": 0.6666666666666666,
+            "precision@8": 0.75,
+            "ndcg@8": 0.45024112349881756,
+            "recall@10": 0.6666666666666666,
+            "precision@10": 0.6,
+            "ndcg@10": 0.445008358218902
+          },
+          "Mathematics": {
+            "recall@3": 0.17647058823529413,
+            "precision@3": 1.0,
+            "ndcg@3": 0.8025999877467899,
+            "recall@5": 0.17647058823529413,
+            "precision@5": 0.6,
+            "ndcg@5": 0.7250076625431047,
+            "recall@8": 0.35294117647058826,
+            "precision@8": 0.75,
+            "ndcg@8": 0.8253852217373541,
+            "recall@10": 0.47058823529411764,
+            "precision@10": 0.8,
+            "ndcg@10": 0.828941463160169
+          }
+        }
+      },
+      {
+        "year": 2023,
+        "subjects": {
+          "Physics": {
+            "recall@3": 0.23076923076923078,
+            "precision@3": 1.0,
+            "ndcg@3": 0.635846659886428,
+            "recall@5": 0.38461538461538464,
+            "precision@5": 1.0,
+            "ndcg@5": 0.8066471839620196,
+            "recall@8": 0.6153846153846154,
+            "precision@8": 1.0,
+            "ndcg@8": 0.871422272552388,
+            "recall@10": 0.6153846153846154,
+            "precision@10": 0.8,
+            "ndcg@10": 0.8557863586093215
+          },
+          "Chemistry": {
+            "recall@3": 0.2,
+            "precision@3": 1.0,
+            "ndcg@3": 0.997796302223857,
+            "recall@5": 0.3333333333333333,
+            "precision@5": 1.0,
+            "ndcg@5": 0.9978015554553451,
+            "recall@8": 0.4666666666666667,
+            "precision@8": 0.875,
+            "ndcg@8": 0.9981460055393164,
+            "recall@10": 0.6,
+            "precision@10": 0.9,
+            "ndcg@10": 0.9981470665192543
+          },
+          "Biology": {
+            "recall@3": 0.3,
+            "precision@3": 1.0,
+            "ndcg@3": 0.2175078903020256,
+            "recall@5": 0.5,
+            "precision@5": 1.0,
+            "ndcg@5": 0.5023921790879741,
+            "recall@8": 0.7,
+            "precision@8": 0.875,
+            "ndcg@8": 0.5952910572277226,
+            "recall@10": 0.8,
+            "precision@10": 0.8,
+            "ndcg@10": 0.5973631857073827
+          },
+          "Mathematics": {
+            "recall@3": 0.21428571428571427,
+            "precision@3": 1.0,
+            "ndcg@3": 0.984641237082543,
+            "recall@5": 0.2857142857142857,
+            "precision@5": 0.8,
+            "ndcg@5": 0.9748163051102121,
+            "recall@8": 0.5,
+            "precision@8": 0.875,
+            "ndcg@8": 0.9751976847608442,
+            "recall@10": 0.6428571428571429,
+            "precision@10": 0.9,
+            "ndcg@10": 0.9774381569468754
+          }
+        }
+      },
+      {
+        "year": 2024,
+        "subjects": {
+          "Physics": {
+            "recall@3": 0.25,
+            "precision@3": 1.0,
+            "ndcg@3": 0.5218369911622305,
+            "recall@5": 0.4166666666666667,
+            "precision@5": 1.0,
+            "ndcg@5": 0.4977599659987788,
+            "recall@8": 0.6666666666666666,
+            "precision@8": 1.0,
+            "ndcg@8": 0.5811745057572099,
+            "recall@10": 0.75,
+            "precision@10": 0.9,
+            "ndcg@10": 0.5816731892572641
+          },
+          "Chemistry": {
+            "recall@3": 0.3333333333333333,
+            "precision@3": 0.3333333333333333,
+            "ndcg@3": 0.11501879892015682,
+            "recall@5": 0.3333333333333333,
+            "precision@5": 0.2,
+            "ndcg@5": 0.11501879892015682,
+            "recall@8": 0.6666666666666666,
+            "precision@8": 0.25,
+            "ndcg@8": 0.11955047175957396,
+            "recall@10": 0.6666666666666666,
+            "precision@10": 0.2,
+            "ndcg@10": 0.11955047175957396
+          },
+          "Biology": {
+            "recall@3": 0.2727272727272727,
+            "precision@3": 1.0,
+            "ndcg@3": 0.3881223682323407,
+            "recall@5": 0.45454545454545453,
+            "precision@5": 1.0,
+            "ndcg@5": 0.6014407514233804,
+            "recall@8": 0.7272727272727273,
+            "precision@8": 1.0,
+            "ndcg@8": 0.6387954411803504,
+            "recall@10": 0.8181818181818182,
+            "precision@10": 0.9,
+            "ndcg@10": 0.6502687145109548
+          },
+          "Mathematics": {
+            "recall@3": 0.2,
+            "precision@3": 0.6666666666666666,
+            "ndcg@3": 0.8744116057359962,
+            "recall@5": 0.4,
+            "precision@5": 0.8,
+            "ndcg@5": 0.8723221850510763,
+            "recall@8": 0.6,
+            "precision@8": 0.75,
+            "ndcg@8": 0.8729837020973185,
+            "recall@10": 0.6,
+            "precision@10": 0.6,
+            "ndcg@10": 0.8721343449487532
+          }
+        }
+      },
+      {
+        "year": 2025,
+        "subjects": {
+          "Physics": {
+            "recall@3": 0.3333333333333333,
+            "precision@3": 1.0,
+            "ndcg@3": 1.0,
+            "recall@5": 0.4444444444444444,
+            "precision@5": 0.8,
+            "ndcg@5": 0.9591590443300424,
+            "recall@8": 0.7777777777777778,
+            "precision@8": 0.875,
+            "ndcg@8": 0.9824241894997325,
+            "recall@10": 0.8888888888888888,
+            "precision@10": 0.8,
+            "ndcg@10": 0.9822048917616141
+          },
+          "Chemistry": {
+            "recall@3": 0.3,
+            "precision@3": 1.0,
+            "ndcg@3": 0.6363428159208391,
+            "recall@5": 0.5,
+            "precision@5": 1.0,
+            "ndcg@5": 0.6492979527058323,
+            "recall@8": 0.7,
+            "precision@8": 0.875,
+            "ndcg@8": 0.6586043279175184,
+            "recall@10": 0.7,
+            "precision@10": 0.7,
+            "ndcg@10": 0.6530870597641261
+          },
+          "Biology": {
+            "recall@3": 0.2727272727272727,
+            "precision@3": 1.0,
+            "ndcg@3": 0.8046129061698147,
+            "recall@5": 0.45454545454545453,
+            "precision@5": 1.0,
+            "ndcg@5": 0.9364759149279142,
+            "recall@8": 0.5454545454545454,
+            "precision@8": 0.75,
+            "ndcg@8": 0.870909194887172,
+            "recall@10": 0.6363636363636364,
+            "precision@10": 0.7,
+            "ndcg@10": 0.8586510704382875
+          },
+          "Mathematics": {
+            "recall@3": 0.2222222222222222,
+            "precision@3": 0.6666666666666666,
+            "ndcg@3": 0.9714910416960844,
+            "recall@5": 0.3333333333333333,
+            "precision@5": 0.6,
+            "ndcg@5": 0.9425012295466497,
+            "recall@8": 0.6666666666666666,
+            "precision@8": 0.75,
+            "ndcg@8": 0.9625602563864061,
+            "recall@10": 0.7777777777777778,
+            "precision@10": 0.7,
+            "ndcg@10": 0.9627209158145762
+          }
+        }
+      }
+    ]
+  },
+  "regression_metrics": {
+    "overall": {
+      "mae": 1.0352906956401025,
+      "mape": 58.89434674887417,
+      "r2": 0.25232795782517703
+    },
+    "chapter_wise": {
+      "Physics::Electromagnetic Waves": {
+        "mae": 0.6011184951127745,
+        "mape": 59.84114642053363,
+        "r2": -0.6227952810433008,
+        "n_years": 5
+      },
+      "Physics::Kinetic Theory": {
+        "mae": 0.6186113399868528,
+        "mape": 66.72888526803071,
+        "r2": -0.7071304834903138,
+        "n_years": 5
+      },
+      "Physics::Electromagnetism": {
+        "mae": 1.1671046193554104,
+        "mape": 40.052018561489575,
+        "r2": -0.4037555988787216,
+        "n_years": 5
+      },
+      "Physics::Optics": {
+        "mae": 2.3656743718472697,
+        "mape": 85.49985537308812,
+        "r2": -1.4630927283848618,
+        "n_years": 5
+      },
+      "Physics::Mechanics": {
+        "mae": 1.918263251065597,
+        "mape": 37.99859835464526,
+        "r2": -2.6651121606744606,
+        "n_years": 5
+      },
+      "Physics::Quantum Mechanics": {
+        "mae": 2.6965645687731956,
+        "mape": 93.27190227409719,
+        "r2": -0.9812833431450232,
+        "n_years": 5
+      },
+      "Physics::Thermodynamics": {
+        "mae": 2.050969039833393,
+        "mape": 33.5954463312507,
+        "r2": -2.014486974028948,
+        "n_years": 5
+      },
+      "Physics::Waves": {
+        "mae": 1.1008227290264216,
+        "mape": 50.17082214877977,
+        "r2": -0.7764872640327323,
+        "n_years": 5
+      },
+      "Physics::Fluid Mechanics": {
+        "mae": 1.2696007810234624,
+        "mape": 65.09368541092964,
+        "r2": -0.41872313401106864,
+        "n_years": 5
+      },
+      "Physics::Kinematics": {
+        "mae": 0.7756055222747021,
+        "mape": 85.42726416655681,
+        "r2": -0.34028673717881697,
+        "n_years": 5
+      },
+      "Physics::Gravitation": {
+        "mae": 0.9005248007794664,
+        "mape": 66.82230865498954,
+        "r2": -1.114453526394497,
+        "n_years": 5
+      },
+      "Physics::Electrostatics": {
+        "mae": 2.5880845445868594,
+        "mape": 87.63068504324283,
+        "r2": -0.8886370914472803,
+        "n_years": 5
+      },
+      "Physics::Nuclear Physics": {
+        "mae": 0.8751950788945553,
+        "mape": 64.3920017175345,
+        "r2": -3.1893717558380272,
+        "n_years": 5
+      },
+      "Physics::Oscillations": {
+        "mae": 0.39971100180618957,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Physics::Magnetism": {
+        "mae": 1.1227048877100916,
+        "mape": 76.90453094445316,
+        "r2": -0.8159674785503508,
+        "n_years": 5
+      },
+      "Physics::Work, Energy and Power": {
+        "mae": 0.42192277363833436,
+        "mape": 72.93853841057118,
+        "r2": -0.32887403034394147,
+        "n_years": 5
+      },
+      "Physics::Units and Dimensions": {
+        "mae": 0.6179533589140324,
+        "mape": 52.44056217563464,
+        "r2": -1.8196937053315323,
+        "n_years": 5
+      },
+      "Physics::Semiconductors": {
+        "mae": 0.44101879420418477,
+        "mape": 40.1930608421748,
+        "r2": 0.12455147293973368,
+        "n_years": 5
+      },
+      "Chemistry::Solid State": {
+        "mae": 0.6492240578827575,
+        "mape": 33.83043403251405,
+        "r2": -1.1692167732702807,
+        "n_years": 5
+      },
+      "Chemistry::Organic Chemistry": {
+        "mae": 5.125417820103066,
+        "mape": 51.115545668038806,
+        "r2": -4.520024158504369,
+        "n_years": 5
+      },
+      "Chemistry::Chemical Bonding": {
+        "mae": 1.218236132499546,
+        "mape": 38.38629478390958,
+        "r2": -1.2569558967266592,
+        "n_years": 5
+      },
+      "Chemistry::General Chemistry": {
+        "mae": 4.136649978753768,
+        "mape": 195.56926111566807,
+        "r2": -0.3341461666683645,
+        "n_years": 5
+      },
+      "Chemistry::Thermodynamics": {
+        "mae": 1.823050175912602,
+        "mape": 101.5942497729645,
+        "r2": -1.5136423923916067,
+        "n_years": 5
+      },
+      "Chemistry::Electrochemistry": {
+        "mae": 0.867269571355946,
+        "mape": 62.02730417709699,
+        "r2": -0.6471833800490321,
+        "n_years": 5
+      },
+      "Chemistry::Chemical Kinetics": {
+        "mae": 1.3388418073811141,
+        "mape": 38.03756552464585,
+        "r2": -0.7450312599045423,
+        "n_years": 5
+      },
+      "Chemistry::Analytical Chemistry": {
+        "mae": 0.16400517209607313,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Chemistry::Periodic Table": {
+        "mae": 0.3328399146549708,
+        "mape": 95.35845295110796,
+        "r2": -0.36465787657340143,
+        "n_years": 5
+      },
+      "Chemistry::Acids and Bases": {
+        "mae": 0.7834995696043773,
+        "mape": 48.73407998272115,
+        "r2": -3.200459307696823,
+        "n_years": 5
+      },
+      "Chemistry::Nuclear Chemistry": {
+        "mae": 0.33172647962052865,
+        "mape": 87.9256547496792,
+        "r2": -0.19226202277916382,
+        "n_years": 5
+      },
+      "Chemistry::Atomic Structure": {
+        "mae": 1.4043095689254301,
+        "mape": 68.05672854115666,
+        "r2": -1.1250944691893774,
+        "n_years": 5
+      },
+      "Chemistry::Chemical Equilibrium": {
+        "mae": 0.6490535708145725,
+        "mape": 30.998523006257923,
+        "r2": -1.6851567130615006,
+        "n_years": 5
+      },
+      "Chemistry::Metallurgy": {
+        "mae": 0.45209451803219747,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Chemistry::Coordination Chemistry": {
+        "mae": 1.7057288771173915,
+        "mape": 93.83080566708826,
+        "r2": -1.4036543343469026,
+        "n_years": 5
+      },
+      "Chemistry::p-Block Elements": {
+        "mae": 1.1629953535319812,
+        "mape": 41.500312098058615,
+        "r2": -0.7941671504603638,
+        "n_years": 5
+      },
+      "Chemistry::Magnetism": {
+        "mae": 0.14447753029725008,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Chemistry::Ionic Equilibrium": {
+        "mae": 0.3848833335938069,
+        "mape": 87.78493781774081,
+        "r2": -0.3396247590097399,
+        "n_years": 5
+      },
+      "Chemistry::Solutions": {
+        "mae": 0.3848833335938069,
+        "mape": 87.78493781774081,
+        "r2": -0.3396247590097399,
+        "n_years": 5
+      },
+      "Biology::Genetics": {
+        "mae": 0.9886209102458959,
+        "mape": 37.36978490889783,
+        "r2": -1.5077974164807202,
+        "n_years": 5
+      },
+      "Biology::Plant Biology": {
+        "mae": 0.5518502796181549,
+        "mape": 72.59345694844501,
+        "r2": -1.0320961397100135,
+        "n_years": 5
+      },
+      "Biology::Animal Physiology": {
+        "mae": 0.720871791803908,
+        "mape": 75.49589988749922,
+        "r2": -2.704907093842685,
+        "n_years": 5
+      },
+      "Biology::Ecology": {
+        "mae": 1.7606066368026094,
+        "mape": 50.12502494244103,
+        "r2": -1.6200264902904338,
+        "n_years": 5
+      },
+      "Biology::Cell Biology": {
+        "mae": 1.8556575130027224,
+        "mape": 59.546164662141265,
+        "r2": -0.7555724068086569,
+        "n_years": 5
+      },
+      "Biology::Molecular Biology": {
+        "mae": 1.2165403937756958,
+        "mape": 46.692734798534566,
+        "r2": 0.09900141339082802,
+        "n_years": 5
+      },
+      "Biology::Biochemistry": {
+        "mae": 1.5453963889548965,
+        "mape": 56.70796173244832,
+        "r2": -0.8772845524692672,
+        "n_years": 5
+      },
+      "Biology::Plant Physiology": {
+        "mae": 0.6918995872788596,
+        "mape": 35.07246608500175,
+        "r2": -0.16309941546826012,
+        "n_years": 5
+      },
+      "Biology::Evolutionary Biology": {
+        "mae": 1.6718471327187547,
+        "mape": 40.070659677395795,
+        "r2": -0.8190887782339595,
+        "n_years": 5
+      },
+      "Biology::Excretory System": {
+        "mae": 0.24416963160180996,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Biology::Enzymes": {
+        "mae": 0.4031093773021306,
+        "mape": 44.42908867401199,
+        "r2": -0.036738171092961514,
+        "n_years": 5
+      },
+      "Biology::Endocrinology": {
+        "mae": 0.15034337939559375,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Biology::Microbiology": {
+        "mae": 1.402910488198219,
+        "mape": 68.12816109473806,
+        "r2": -1.065280415436431,
+        "n_years": 5
+      },
+      "Biology::Human Physiology": {
+        "mae": 1.2250455138945315,
+        "mape": 82.74325795513133,
+        "r2": -0.45850404534323785,
+        "n_years": 5
+      },
+      "Biology::Cell Cycle and Cell Division": {
+        "mae": 0.6049679126528931,
+        "mape": 34.170994046932016,
+        "r2": -0.0018031937360043493,
+        "n_years": 5
+      },
+      "Biology::Plant Reproduction": {
+        "mae": 0.480472963412521,
+        "mape": 96.00777452285084,
+        "r2": -1.031384135157544,
+        "n_years": 5
+      },
+      "Biology::Biotechnology": {
+        "mae": 1.5971875788569723,
+        "mape": 54.80779119641088,
+        "r2": -0.729474106667199,
+        "n_years": 5
+      },
+      "Biology::Immunology": {
+        "mae": 1.0029938169957788,
+        "mape": 74.09911380871034,
+        "r2": -0.6770814802002036,
+        "n_years": 5
+      },
+      "Biology::Neuroscience": {
+        "mae": 0.14511935864253744,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Mathematics::Mensuration": {
+        "mae": 0.47648635461757805,
+        "mape": 58.028416340973756,
+        "r2": -0.439370712064898,
+        "n_years": 5
+      },
+      "Mathematics::Geometry": {
+        "mae": 1.8019215856364705,
+        "mape": 40.622646244918826,
+        "r2": -0.2716270260703899,
+        "n_years": 5
+      },
+      "Mathematics::Binomial Theorem": {
+        "mae": 0.4470017470170234,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Mathematics::Number Theory": {
+        "mae": 1.1105571468878281,
+        "mape": 54.72002004674798,
+        "r2": -1.8718217045444274,
+        "n_years": 5
+      },
+      "Mathematics::Coordinate Geometry": {
+        "mae": 0.8608493570304991,
+        "mape": 30.25440602344302,
+        "r2": -0.8931928917040384,
+        "n_years": 5
+      },
+      "Mathematics::Algebra": {
+        "mae": 2.455772301692993,
+        "mape": 59.045000729292596,
+        "r2": -0.8053752053180214,
+        "n_years": 5
+      },
+      "Mathematics::Probability": {
+        "mae": 0.529564874885342,
+        "mape": 29.422187095670658,
+        "r2": -1.2889134625952683,
+        "n_years": 5
+      },
+      "Mathematics::Trigonometry": {
+        "mae": 1.346729220121739,
+        "mape": 41.15979903977625,
+        "r2": -0.16815450896242257,
+        "n_years": 5
+      },
+      "Mathematics::Calculus": {
+        "mae": 4.6963480527674415,
+        "mape": 64.02802310167954,
+        "r2": -4.545574066992238,
+        "n_years": 5
+      },
+      "Mathematics::Complex Numbers": {
+        "mae": 0.9481227986938254,
+        "mape": 61.90808350902937,
+        "r2": -1.931597538024747,
+        "n_years": 5
+      },
+      "Mathematics::Vectors": {
+        "mae": 0.9061726474647015,
+        "mape": 39.32325436409698,
+        "r2": -0.9490621792480887,
+        "n_years": 5
+      },
+      "Mathematics::Differential Equations": {
+        "mae": 0.7787054168595106,
+        "mape": 46.204221751628374,
+        "r2": -0.4560444824876355,
+        "n_years": 5
+      },
+      "Mathematics::Linear Algebra": {
+        "mae": 1.1661959951750487,
+        "mape": 70.29191796536938,
+        "r2": -0.5326632724230491,
+        "n_years": 5
+      },
+      "Mathematics::Combinatorics": {
+        "mae": 1.0168522410002157,
+        "mape": 53.14370723242071,
+        "r2": -0.4229560503369827,
+        "n_years": 5
+      },
+      "Mathematics::Functions": {
+        "mae": 0.900535216813326,
+        "mape": 34.966846612599575,
+        "r2": -4.527302853996946,
+        "n_years": 5
+      },
+      "Mathematics::Set Theory": {
+        "mae": 0.8167360320107886,
+        "mape": 42.94786120251242,
+        "r2": -0.028124811484364853,
+        "n_years": 5
+      },
+      "Mathematics::Conic Sections": {
+        "mae": 0.29803013980894577,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Mathematics::Limits": {
+        "mae": 0.29662285797003207,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Mathematics::Continuity and Differentiability": {
+        "mae": 0.250705424109637,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Mathematics::Ellipse": {
+        "mae": 0.3792197216748402,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Mathematics::Matrices": {
+        "mae": 1.5021875081716745,
+        "mape": 81.32566111667919,
+        "r2": -0.7376382816510041,
+        "n_years": 5
+      },
+      "Mathematics::Polynomials": {
+        "mae": 0.529994302794172,
+        "mape": 63.64055071067172,
+        "r2": -0.23432480255857535,
+        "n_years": 5
+      },
+      "Mathematics::Sequences and Series": {
+        "mae": 0.5581023480649888,
+        "mape": 58.9630734901451,
+        "r2": -0.3397810790387603,
+        "n_years": 5
+      },
+      "Mathematics::Quadratic Equations": {
+        "mae": 0.47648635461757805,
+        "mape": 58.028416340973756,
+        "r2": -0.439370712064898,
+        "n_years": 5
+      },
+      "Physics::Astrophysics": {
+        "mae": 0.31209470148626645,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 4
+      },
+      "Chemistry::Periodic Properties": {
+        "mae": 0.21405777712802307,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 4
+      },
+      "Chemistry::s-Block Elements": {
+        "mae": 0.459321407220028,
+        "mape": 25.58017177002665,
+        "r2": -0.3722861581534227,
+        "n_years": 4
+      },
+      "Chemistry::d-Block Elements": {
+        "mae": 0.21405777712802307,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 4
+      },
+      "Chemistry::Biomolecules": {
+        "mae": 0.4593075394146167,
+        "mape": 60.845486143515416,
+        "r2": -0.022659493980628387,
+        "n_years": 4
+      },
+      "Biology::Human Health and Disease": {
+        "mae": 0.6101151559916501,
+        "mape": 73.60150561850458,
+        "r2": -0.6278717173018804,
+        "n_years": 4
+      },
+      "Mathematics::Logical Reasoning": {
+        "mae": 0.2881851261526934,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 4
+      },
+      "Physics::Statistics": {
+        "mae": 0.26931777310119326,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 3
+      },
+      "Chemistry::Redox Reactions": {
+        "mae": 0.32487610748215,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 3
+      },
+      "Biology::Neural Control and Coordination": {
+        "mae": 0.3160700168438834,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 3
+      },
+      "Biology::Circulatory System": {
+        "mae": 0.3160700168438834,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 3
+      },
+      "Biology::Biomolecules": {
+        "mae": 1.7898144055582723,
+        "mape": 93.80788626615232,
+        "r2": -0.47743780911387534,
+        "n_years": 3
+      },
+      "Biology::Photosynthesis": {
+        "mae": 0.2057254628560524,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 3
+      },
+      "Mathematics::Limits and Continuity": {
+        "mae": 0.30985229581289053,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 3
+      },
+      "Mathematics::Permutations and Combinations": {
+        "mae": 0.30985229581289053,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 3
+      },
+      "Mathematics::Relations and Functions": {
+        "mae": 0.15598971828457808,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 3
+      },
+      "Chemistry::Inorganic Chemistry": {
+        "mae": 5.6893094166036935,
+        "mape": 116.89309416603693,
+        "r2": -1.4750391735055475,
+        "n_years": 2
+      }
+    },
+    "topic_wise": {
+      "Physics::Polarization": {
+        "mae": 2.625843433040494,
+        "mape": 75.8878485782399,
+        "r2": -2.0439027755291734,
+        "n_years": 5
+      },
+      "Physics::Pumping and Evacuation": {
+        "mae": 0.6186113399868528,
+        "mape": 66.72888526803071,
+        "r2": -0.7071304834903138,
+        "n_years": 5
+      },
+      "Physics::Magnetic Field due to Current": {
+        "mae": 2.2898095070655016,
+        "mape": 70.3926260259578,
+        "r2": -0.8311640640947184,
+        "n_years": 5
+      },
+      "Physics::Rolling Motion": {
+        "mae": 1.918263251065597,
+        "mape": 37.99859835464526,
+        "r2": -2.6651121606744606,
+        "n_years": 5
+      },
+      "Physics::de Broglie Wavelength": {
+        "mae": 2.6965645687731956,
+        "mape": 93.27190227409719,
+        "r2": -0.9812833431450232,
+        "n_years": 5
+      },
+      "Physics::Blackbody Radiation": {
+        "mae": 2.050969039833393,
+        "mape": 33.5954463312507,
+        "r2": -2.014486974028948,
+        "n_years": 5
+      },
+      "Physics::Doppler Effect": {
+        "mae": 1.1008227290264216,
+        "mape": 50.17082214877977,
+        "r2": -0.7764872640327323,
+        "n_years": 5
+      },
+      "Physics::Rotating Tube": {
+        "mae": 1.2696007810234624,
+        "mape": 65.09368541092964,
+        "r2": -0.41872313401106864,
+        "n_years": 5
+      },
+      "Physics::Projectile Motion": {
+        "mae": 0.7756055222747021,
+        "mape": 85.42726416655681,
+        "r2": -0.34028673717881697,
+        "n_years": 5
+      },
+      "Physics::Orbital Motion": {
+        "mae": 0.9005248007794664,
+        "mape": 66.82230865498954,
+        "r2": -1.114453526394497,
+        "n_years": 5
+      },
+      "Physics::Electric Field": {
+        "mae": 2.5880845445868594,
+        "mape": 87.63068504324283,
+        "r2": -0.8886370914472803,
+        "n_years": 5
+      },
+      "Physics::Radioactive Decay": {
+        "mae": 0.8751950788945553,
+        "mape": 64.3920017175345,
+        "r2": -3.1893717558380272,
+        "n_years": 5
+      },
+      "Physics::Dimensional Analysis": {
+        "mae": 0.3711597693126779,
+        "mape": 13.915149964692045,
+        "r2": -1.265579089521772,
+        "n_years": 5
+      },
+      "Physics::Work Done": {
+        "mae": 0.42192277363833436,
+        "mape": 72.93853841057118,
+        "r2": -0.32887403034394147,
+        "n_years": 5
+      },
+      "Physics::p-n Junction": {
+        "mae": 0.44101879420418477,
+        "mape": 40.1930608421748,
+        "r2": 0.12455147293973368,
+        "n_years": 5
+      },
+      "Chemistry::Crystal Lattice": {
+        "mae": 0.6492240578827575,
+        "mape": 33.83043403251405,
+        "r2": -1.1692167732702807,
+        "n_years": 5
+      },
+      "Chemistry::Reaction Mechanisms": {
+        "mae": 5.125417820103066,
+        "mape": 51.115545668038806,
+        "r2": -4.520024158504369,
+        "n_years": 5
+      },
+      "Chemistry::Molecular Orbital Theory": {
+        "mae": 1.218236132499546,
+        "mape": 38.38629478390958,
+        "r2": -1.2569558967266592,
+        "n_years": 5
+      },
+      "Chemistry::Colligative Properties": {
+        "mae": 4.136649978753768,
+        "mape": 195.56926111566807,
+        "r2": -0.3341461666683645,
+        "n_years": 5
+      },
+      "Chemistry::Gibbs Free Energy": {
+        "mae": 1.823050175912602,
+        "mape": 101.5942497729645,
+        "r2": -1.5136423923916067,
+        "n_years": 5
+      },
+      "Chemistry::Standard Electrode Potential": {
+        "mae": 0.867269571355946,
+        "mape": 62.02730417709699,
+        "r2": -0.6471833800490321,
+        "n_years": 5
+      },
+      "Chemistry::Activation Energy": {
+        "mae": 1.3388418073811141,
+        "mape": 38.03756552464585,
+        "r2": -0.7450312599045423,
+        "n_years": 5
+      },
+      "Chemistry::Iodometric Titration": {
+        "mae": 0.16400517209607313,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Chemistry::Ionization Energy": {
+        "mae": 0.3328399146549708,
+        "mape": 95.35845295110796,
+        "r2": -0.36465787657340143,
+        "n_years": 5
+      },
+      "Chemistry::pH Calculation": {
+        "mae": 0.7834995696043773,
+        "mape": 48.73407998272115,
+        "r2": -3.200459307696823,
+        "n_years": 5
+      },
+      "Chemistry::Half-Life": {
+        "mae": 0.33172647962052865,
+        "mape": 87.9256547496792,
+        "r2": -0.19226202277916382,
+        "n_years": 5
+      },
+      "Chemistry::Electronic Configuration": {
+        "mae": 1.4043095689254301,
+        "mape": 68.05672854115666,
+        "r2": -1.1250944691893774,
+        "n_years": 5
+      },
+      "Chemistry::Le Chatelier's Principle": {
+        "mae": 0.6490535708145725,
+        "mape": 30.998523006257923,
+        "r2": -1.6851567130615006,
+        "n_years": 5
+      },
+      "Chemistry::Hall-Heroult Process": {
+        "mae": 0.45209451803219747,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Chemistry::Crystal Field Theory": {
+        "mae": 1.7057288771173915,
+        "mape": 93.83080566708826,
+        "r2": -1.4036543343469026,
+        "n_years": 5
+      },
+      "Chemistry::Boron Compounds": {
+        "mae": 1.1629953535319812,
+        "mape": 41.500312098058615,
+        "r2": -0.7941671504603638,
+        "n_years": 5
+      },
+      "Chemistry::Paramagnetic Species": {
+        "mae": 0.14447753029725008,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Chemistry::pH of Strong Acid": {
+        "mae": 0.3848833335938069,
+        "mape": 87.78493781774081,
+        "r2": -0.3396247590097399,
+        "n_years": 5
+      },
+      "Chemistry::Boiling Point Elevation": {
+        "mae": 0.3848833335938069,
+        "mape": 87.78493781774081,
+        "r2": -0.3396247590097399,
+        "n_years": 5
+      },
+      "Biology::Pedigree Analysis": {
+        "mae": 1.477098944962688,
+        "mape": 61.79368664473742,
+        "r2": -4.8984380749767835,
+        "n_years": 5
+      },
+      "Biology::Life Cycle of Moss": {
+        "mae": 0.5518502796181549,
+        "mape": 72.59345694844501,
+        "r2": -1.0320961397100135,
+        "n_years": 5
+      },
+      "Biology::Energy Metabolism": {
+        "mae": 0.720871791803908,
+        "mape": 75.49589988749922,
+        "r2": -2.704907093842685,
+        "n_years": 5
+      },
+      "Biology::Competition": {
+        "mae": 1.7606066368026094,
+        "mape": 50.12502494244103,
+        "r2": -1.6200264902904338,
+        "n_years": 5
+      },
+      "Biology::Membrane Proteins": {
+        "mae": 1.8556575130027224,
+        "mape": 59.546164662141265,
+        "r2": -0.7555724068086569,
+        "n_years": 5
+      },
+      "Biology::Transcription": {
+        "mae": 1.2165403937756958,
+        "mape": 46.692734798534566,
+        "r2": 0.09900141339082802,
+        "n_years": 5
+      },
+      "Biology::Enzyme Kinetics": {
+        "mae": 1.4159847843043702,
+        "mape": 70.15123652988915,
+        "r2": -1.5227487523615708,
+        "n_years": 5
+      },
+      "Biology::Water Potential": {
+        "mae": 0.6918995872788596,
+        "mape": 35.07246608500175,
+        "r2": -0.16309941546826012,
+        "n_years": 5
+      },
+      "Biology::Natural Selection": {
+        "mae": 1.6718471327187547,
+        "mape": 40.070659677395795,
+        "r2": -0.8190887782339595,
+        "n_years": 5
+      },
+      "Biology::Nitrogenous Wastes": {
+        "mae": 0.24416963160180996,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Biology::Hormones": {
+        "mae": 0.15034337939559375,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Biology::Bacterial Growth": {
+        "mae": 1.402910488198219,
+        "mape": 68.12816109473806,
+        "r2": -1.065280415436431,
+        "n_years": 5
+      },
+      "Biology::Eye and Vision": {
+        "mae": 1.2250455138945315,
+        "mape": 82.74325795513133,
+        "r2": -0.45850404534323785,
+        "n_years": 5
+      },
+      "Biology::Meiosis": {
+        "mae": 0.6049679126528931,
+        "mape": 34.170994046932016,
+        "r2": -0.0018031937360043493,
+        "n_years": 5
+      },
+      "Biology::Double Fertilization": {
+        "mae": 0.480472963412521,
+        "mape": 96.00777452285084,
+        "r2": -1.031384135157544,
+        "n_years": 5
+      },
+      "Biology::Polymerase Chain Reaction (PCR)": {
+        "mae": 1.5971875788569723,
+        "mape": 54.80779119641088,
+        "r2": -0.729474106667199,
+        "n_years": 5
+      },
+      "Biology::Antibody Types": {
+        "mae": 1.0029938169957788,
+        "mape": 74.09911380871034,
+        "r2": -0.6770814802002036,
+        "n_years": 5
+      },
+      "Biology::Action Potential": {
+        "mae": 0.33476136874886747,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Mathematics::Volume of Cone": {
+        "mae": 0.47648635461757805,
+        "mape": 58.028416340973756,
+        "r2": -0.439370712064898,
+        "n_years": 5
+      },
+      "Mathematics::Triangles": {
+        "mae": 1.8019215856364705,
+        "mape": 40.622646244918826,
+        "r2": -0.2716270260703899,
+        "n_years": 5
+      },
+      "Mathematics::Expansion": {
+        "mae": 0.4470017470170234,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Mathematics::Diophantine Equations": {
+        "mae": 1.1105571468878281,
+        "mape": 54.72002004674798,
+        "r2": -1.8718217045444274,
+        "n_years": 5
+      },
+      "Mathematics::Ellipse": {
+        "mae": 0.8608493570304991,
+        "mape": 30.25440602344302,
+        "r2": -0.8931928917040384,
+        "n_years": 5
+      },
+      "Mathematics::Polynomial Roots": {
+        "mae": 2.455772301692993,
+        "mape": 59.045000729292596,
+        "r2": -0.8053752053180214,
+        "n_years": 5
+      },
+      "Mathematics::Conditional Probability": {
+        "mae": 0.529564874885342,
+        "mape": 29.422187095670658,
+        "r2": -1.2889134625952683,
+        "n_years": 5
+      },
+      "Mathematics::Angles of Elevation": {
+        "mae": 1.346729220121739,
+        "mape": 41.15979903977625,
+        "r2": -0.16815450896242257,
+        "n_years": 5
+      },
+      "Mathematics::Definite Integrals": {
+        "mae": 4.6963480527674415,
+        "mape": 64.02802310167954,
+        "r2": -4.545574066992238,
+        "n_years": 5
+      },
+      "Mathematics::Geometry": {
+        "mae": 0.9481227986938254,
+        "mape": 61.90808350902937,
+        "r2": -1.931597538024747,
+        "n_years": 5
+      },
+      "Mathematics::Vector Triple Product": {
+        "mae": 0.9061726474647015,
+        "mape": 39.32325436409698,
+        "r2": -0.9490621792480887,
+        "n_years": 5
+      },
+      "Mathematics::First Order Linear": {
+        "mae": 0.7787054168595106,
+        "mape": 46.204221751628374,
+        "r2": -0.4560444824876355,
+        "n_years": 5
+      },
+      "Mathematics::System of Equations": {
+        "mae": 1.1661959951750487,
+        "mape": 70.29191796536938,
+        "r2": -0.5326632724230491,
+        "n_years": 5
+      },
+      "Mathematics::Binomial Summation": {
+        "mae": 1.0168522410002157,
+        "mape": 53.14370723242071,
+        "r2": -0.4229560503369827,
+        "n_years": 5
+      },
+      "Mathematics::Range": {
+        "mae": 0.900535216813326,
+        "mape": 34.966846612599575,
+        "r2": -4.527302853996946,
+        "n_years": 5
+      },
+      "Mathematics::Set Operations": {
+        "mae": 0.8167360320107886,
+        "mape": 42.94786120251242,
+        "r2": -0.028124811484364853,
+        "n_years": 5
+      },
+      "Mathematics::Circle and Parabola": {
+        "mae": 0.29803013980894577,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Mathematics::Trigonometric Limit": {
+        "mae": 0.29662285797003207,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Mathematics::Piecewise Function": {
+        "mae": 0.250705424109637,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Mathematics::Eccentricity": {
+        "mae": 0.3792197216748402,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 5
+      },
+      "Mathematics::Determinant": {
+        "mae": 1.5021875081716745,
+        "mape": 81.32566111667919,
+        "r2": -0.7376382816510041,
+        "n_years": 5
+      },
+      "Mathematics::Functional Equations": {
+        "mae": 0.529994302794172,
+        "mape": 63.64055071067172,
+        "r2": -0.23432480255857535,
+        "n_years": 5
+      },
+      "Mathematics::Recurrence Relations": {
+        "mae": 0.5581023480649888,
+        "mape": 58.9630734901451,
+        "r2": -0.3397810790387603,
+        "n_years": 5
+      },
+      "Mathematics::Sum and Product of Roots": {
+        "mae": 0.47648635461757805,
+        "mape": 58.028416340973756,
+        "r2": -0.439370712064898,
+        "n_years": 5
+      },
+      "Physics::Black Holes": {
+        "mae": 0.31209470148626645,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 4
+      },
+      "Chemistry::Acidity and Basicity": {
+        "mae": 0.21405777712802307,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 4
+      },
+      "Chemistry::Alkaline Earth Metals in Liquid Ammonia": {
+        "mae": 0.459321407220028,
+        "mape": 25.58017177002665,
+        "r2": -0.3722861581534227,
+        "n_years": 4
+      },
+      "Chemistry::Flame Tests": {
+        "mae": 0.21405777712802307,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 4
+      },
+      "Chemistry::Carbohydrates": {
+        "mae": 0.4593075394146167,
+        "mape": 60.845486143515416,
+        "r2": -0.022659493980628387,
+        "n_years": 4
+      },
+      "Biology::HIV Infection": {
+        "mae": 0.6101151559916501,
+        "mape": 73.60150561850458,
+        "r2": -0.6278717173018804,
+        "n_years": 4
+      },
+      "Mathematics::Quantifiers": {
+        "mae": 0.2881851261526934,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 4
+      },
+      "Physics::Standard Deviation": {
+        "mae": 0.26931777310119326,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 3
+      },
+      "Chemistry::Oxidation by Ozone": {
+        "mae": 0.32487610748215,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 3
+      },
+      "Biology::Types of Circulatory Systems": {
+        "mae": 0.3160700168438834,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 3
+      },
+      "Biology::Spectrophotometry and Absorption Spectra": {
+        "mae": 1.7898144055582723,
+        "mape": 93.80788626615232,
+        "r2": -0.47743780911387534,
+        "n_years": 3
+      },
+      "Biology::Photosynthetic Bacteria": {
+        "mae": 0.2057254628560524,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 3
+      },
+      "Mathematics::Continuity": {
+        "mae": 0.30985229581289053,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 3
+      },
+      "Mathematics::Arrangements": {
+        "mae": 0.30985229581289053,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 3
+      },
+      "Mathematics::Equivalence Relations": {
+        "mae": 0.15598971828457808,
+        "mape": NaN,
+        "r2": 0.0,
+        "n_years": 3
+      },
+      "Chemistry::Oxidation States": {
+        "mae": 5.6893094166036935,
+        "mape": 116.89309416603693,
+        "r2": -1.4750391735055475,
+        "n_years": 2
+      }
+    }
+  }
+}

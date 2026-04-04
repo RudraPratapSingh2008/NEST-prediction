@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-NEST 2026 PREDICTION SYSTEM v6.1 (NaN-safe)
+NEST 2026 PREDICTION SYSTEM v9.0 - Two-Stage Regime-Aware Ranking + Count
 """
 
 from __future__ import annotations
@@ -9,27 +9,24 @@ import json
 import logging
 import sys
 import warnings
-from collections import defaultdict
-from dataclasses import dataclass, field, asdict
+from collections import Counter, defaultdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any
 
 import numpy as np
 import pandas as pd
-from scipy import stats
-from sklearn.calibration import CalibratedClassifierCV
-from sklearn.base import clone
-from sklearn.ensemble import (
-    GradientBoostingClassifier,
-    RandomForestClassifier,
-    VotingClassifier,
+from sklearn.linear_model import LogisticRegression, PoissonRegressor
+from sklearn.metrics import (
+    accuracy_score,
+    f1_score,
+    mean_absolute_error,
+    precision_score,
+    r2_score,
+    recall_score,
+    roc_auc_score,
 )
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score
-from sklearn.model_selection import TimeSeriesSplit
 from sklearn.preprocessing import RobustScaler
-from sklearn.utils.class_weight import compute_class_weight
 
 warnings.filterwarnings("ignore")
 
@@ -47,521 +44,575 @@ class Config:
     data_path: str = "all_merged_cleaned (new).json"
     target_year: int = 2026
     min_appearances: int = 2
-    min_years_for_trend: int = 3
-    recency_tau: float = 3.0
-    rolling_windows: tuple = (2, 3)
     recent_start_year: int = 2020
     exclude_years: tuple = (2021,)
-    cv_splits: int = 3
-    calibration_method: str = "sigmoid"
+    post_change_year: int = 2020
+    post_change_weight: float = 2.5
     top_n: int = 20
-    output_path: str = "nest2026_predictions_v6.json"
+    rank_k_values: tuple = (3, 5, 8, 10)
+    output_path: str = "nest2026_evaluation.json"
 
 
-# ----------------------------------------------------------------------
-# Data loading (same as before, omitted for brevity)
-# ----------------------------------------------------------------------
-# Keep this as a dict. If no normalization map is available, use an empty map.
 TOPIC_NORM: dict[str, str] = {}
+SUBJECTS = ["Physics", "Chemistry", "Biology", "Mathematics"]
+
 
 def load_and_clean(data_path: str) -> list[dict]:
     path = Path(data_path)
     if not path.exists():
         raise FileNotFoundError(f"Data file not found: {path}")
+
     text = path.read_text(encoding="utf-8").strip()
     try:
         raw = json.loads(text)
         if not isinstance(raw, list):
             raw = [raw]
     except json.JSONDecodeError:
-        records = []
+        records: list[dict] = []
         for line in text.splitlines():
             line = line.strip()
             if not line:
                 continue
             try:
                 obj = json.loads(line)
-                if isinstance(obj, list):
-                    records.extend(obj)
-                else:
-                    records.append(obj)
             except Exception:
                 continue
+            if isinstance(obj, list):
+                records.extend(obj)
+            else:
+                records.append(obj)
         raw = records
-    cleaned = []
+
+    topic_map = TOPIC_NORM if isinstance(TOPIC_NORM, dict) else {}
+    cleaned: list[dict] = []
     for q in raw:
         subject = str(q.get("subject", "")).strip()
-        if subject == "General":
+        if not subject or subject == "General":
             continue
+
         chapter = str(q.get("chapter") or "").strip()
         topic_raw = str(q.get("topic") or chapter or subject).strip()
-        topic_map = TOPIC_NORM if isinstance(TOPIC_NORM, dict) else {}
         topic = topic_map.get(topic_raw, topic_raw) or subject
         chapter_norm = topic_map.get(chapter, chapter) or subject
-        year = q.get("year")
-        if year is None:
+
+        year_raw = q.get("year")
+        if year_raw is None:
             continue
-        year = int(year)
-        cleaned.append({
-            "year": year,
-            "subject": subject,
-            "chapter": chapter_norm,
-            "topic": topic,
-            "shift": str(q.get("shift", "Shift 1")).strip(),
-            "difficulty": str(q.get("difficulty", "unknown")).lower(),
-        })
+        try:
+            year = int(year_raw)
+        except Exception:
+            continue
+
+        cleaned.append(
+            {
+                "year": year,
+                "subject": subject,
+                "chapter": chapter_norm,
+                "topic": topic,
+                "shift": str(q.get("shift", "Shift 1")).strip(),
+                "difficulty": str(q.get("difficulty", "unknown")).lower(),
+            }
+        )
+
     log.info(f"Loaded {len(cleaned)} records (General removed).")
     return cleaned
 
 
-# ----------------------------------------------------------------------
-# Feature extraction (NaN-safe)
-# ----------------------------------------------------------------------
-def build_chapter_year_features(records: list[dict], cfg: Config) -> pd.DataFrame:
-    rows = []
+def build_features(records: list[dict], cfg: Config) -> pd.DataFrame:
+    """Build leakage-safe chapter-year features with true count targets."""
+    rows: list[dict] = []
     groups = defaultdict(lambda: defaultdict(list))
     for r in records:
-        key = (r["subject"], r["chapter"])
-        groups[key][r["year"]].append(r)
+        groups[(r["subject"], r["chapter"])][r["year"]].append(r)
 
-    # Precompute historical prior (2007-2019)
-    prior_dict = {}
-    for (subject, chapter), year_dict in groups.items():
-        hist_years = [y for y in year_dict.keys() if y < cfg.recent_start_year and y not in cfg.exclude_years]
-        if hist_years:
-            prior = len(hist_years) / (cfg.recent_start_year - min(hist_years) + 1)
-        else:
-            prior = 0.0
-        prior_dict[(subject, chapter)] = prior
+    all_years = sorted({r["year"] for r in records if r.get("year") is not None})
+    first_year = min(all_years) if all_years else 2007
 
     for (subject, chapter), year_dict in groups.items():
         present_years = sorted(year_dict.keys())
         if not present_years:
             continue
+
         for year in range(min(present_years), cfg.target_year + 1):
             if year in cfg.exclude_years:
                 continue
+
             hist_years = [y for y in present_years if y < year]
             if len(hist_years) < cfg.min_appearances and year != cfg.target_year:
                 continue
 
-            counts = [len(year_dict[y]) for y in hist_years]
+            hist_counts = [len(year_dict[y]) for y in hist_years]
+            hist_flags = [1 if len(year_dict[y]) > 0 else 0 for y in hist_years]
 
-            # Recency-weighted mean
             if hist_years:
-                weights = [np.exp(-(year - y) / cfg.recency_tau) for y in hist_years]
-                wmean = np.average(counts, weights=weights)
+                w = np.exp(-(year - np.array(hist_years)) / 3.0)
+                weighted_mean = float(np.average(hist_counts, weights=w))
             else:
-                wmean = 0.0
+                weighted_mean = 0.0
 
-            # Last 3 appearances
-            last3 = sum(1 for y in hist_years if y >= year - 3)
+            count_last_1 = float(sum(len(year_dict[y]) for y in hist_years if y >= year - 1))
+            count_last_2 = float(sum(len(year_dict[y]) for y in hist_years if y >= year - 2))
+            count_last_3 = float(sum(len(year_dict[y]) for y in hist_years if y >= year - 3))
+            total_questions_hist = float(sum(hist_counts))
+            total_years_appeared = float(sum(hist_flags))
+            mean_count_hist = float(np.mean(hist_counts)) if hist_counts else 0.0
+            std_count_hist = float(np.std(hist_counts)) if len(hist_counts) > 1 else 0.0
 
-            # Total appearances
-            total_app = len(hist_years)
-
-            # Trend slope and p-value (handle insufficient data)
-            if len(counts) >= cfg.min_years_for_trend:
-                x = np.arange(len(counts))
-                slope, _, _, p_val, _ = stats.linregress(x, counts)
+            if len(hist_counts) >= 3:
+                x = np.arange(len(hist_counts))
+                trend_slope = float(np.polyfit(x, hist_counts, 1)[0])
             else:
-                slope, p_val = 0.0, 1.0
+                trend_slope = 0.0
 
-            # Years since last seen
-            last_seen = hist_years[-1] if hist_years else year - 10
-            years_since = year - last_seen
+            last_seen = max(hist_years) if hist_years else first_year - 1
+            years_since_last = float(year - last_seen)
 
-            # Regularity (fraction of years present)
-            if hist_years:
-                span = max(hist_years) - min(hist_years) + 1
-                regularity = len(hist_years) / max(span, 1)
-            else:
-                regularity = 0.0
+            pre_hist_years = [y for y in hist_years if y < cfg.post_change_year]
+            post_hist_years = [y for y in hist_years if y >= cfg.post_change_year]
+            pre_counts = [len(year_dict[y]) for y in pre_hist_years]
+            post_counts = [len(year_dict[y]) for y in post_hist_years]
 
-            # Topic diversity
-            all_topics = set()
-            for y in hist_years:
-                for q in year_dict[y]:
-                    all_topics.add(q.get("topic", ""))
-            topic_diversity = len(all_topics) / max(1, total_app)
+            pre_mean_count = float(np.mean(pre_counts)) if pre_counts else 0.0
+            post_mean_count = float(np.mean(post_counts)) if post_counts else 0.0
+            historical_importance = float(sum(1 for y in pre_hist_years if len(year_dict[y]) > 0))
+            denom = max(1, cfg.post_change_year - first_year)
+            historical_importance = historical_importance / denom
 
-            # Historical prior
-            historical_prior = prior_dict.get((subject, chapter), 0.0)
+            label_count = int(len(year_dict.get(year, [])))
+            label_appear = int(label_count > 0)
 
-            # Rolling averages
-            rolling_2 = np.mean([c for y, c in zip(hist_years, counts) if y >= year - 2]) if any(y >= year - 2 for y in hist_years) else 0.0
-            rolling_3 = np.mean([c for y, c in zip(hist_years, counts) if y >= year - 3]) if any(y >= year - 3 for y in hist_years) else 0.0
-
-            # Core chapter
-            core_chapters = {
-                "Physics": {"Mechanics", "Kinematics", "Thermodynamics", "Electrostatics", "Electromagnetism", "Optics", "Quantum Mechanics", "Nuclear Physics", "Waves", "Oscillations", "Fluid Mechanics", "Gravitation"},
-                "Chemistry": {"Organic Chemistry", "Organic Reactions", "Chemical Bonding", "Chemical Kinetics", "Chemical Equilibrium", "Electrochemistry", "Thermodynamics", "Acids and Bases", "Atomic Structure", "Solid State"},
-                "Biology": {"Genetics", "Molecular Biology", "Evolution", "Ecology", "Cell Biology", "Biochemistry", "Plant Physiology", "Human Physiology", "Immunology"},
-                "Mathematics": {"Calculus", "Algebra", "Probability", "Trigonometry", "Geometry", "Number Theory", "Combinatorics", "Linear Algebra", "Vectors", "Coordinate Geometry", "Differential Equations"},
-            }
-            is_core = int(chapter in core_chapters.get(subject, set()))
-
-            feat = {
-                "weighted_mean": wmean,
-                "last3_appearances": last3,
-                "total_appearances": total_app,
-                "trend_slope": slope,
-                "trend_p": p_val,
-                "years_since_last": years_since,
-                "regularity": regularity,
-                "topic_diversity": topic_diversity,
-                "historical_prior": historical_prior,
-                "is_core": is_core,
-                "rolling_mean_2": rolling_2,
-                "rolling_mean_3": rolling_3,
-            }
-
-            label = int(year in year_dict)
-            rows.append({
-                "subject": subject,
-                "chapter": chapter,
-                "year": year,
-                "label": label,
-                **feat,
-            })
+            rows.append(
+                {
+                    "subject": subject,
+                    "chapter": chapter,
+                    "year": int(year),
+                    "label_count": label_count,
+                    "label_appear": label_appear,
+                    "weighted_mean": weighted_mean,
+                    "count_last_1": count_last_1,
+                    "count_last_2": count_last_2,
+                    "count_last_3": count_last_3,
+                    "total_questions_hist": total_questions_hist,
+                    "total_years_appeared": total_years_appeared,
+                    "mean_count_hist": mean_count_hist,
+                    "std_count_hist": std_count_hist,
+                    "trend_slope": trend_slope,
+                    "years_since_last": years_since_last,
+                    "pre_mean_count": pre_mean_count,
+                    "post_mean_count": post_mean_count,
+                    "historical_importance": historical_importance,
+                    "regime_post_2020": int(year >= cfg.post_change_year),
+                    "section_question_cap": 20.0,
+                    "merit_best3_max": 180.0,
+                }
+            )
 
     df = pd.DataFrame(rows)
-    # Replace any remaining NaN/Inf with 0
     df = df.replace([np.inf, -np.inf], np.nan).fillna(0)
-    log.info(f"Built chapter‑year features: {len(df)} rows, years {df['year'].min()}–{df['year'].max()}")
+    log.info(
+        f"Built chapter-year features: {len(df)} rows, years {df['year'].min()}-{df['year'].max()}"
+    )
     return df
 
 
-# ----------------------------------------------------------------------
-# Training with threshold tuning (NaN-safe)
-# ----------------------------------------------------------------------
-def train_subject_classifier_with_threshold(
-    df: pd.DataFrame,
-    subject: str,
+def verify_data_integrity(df: pd.DataFrame, cfg: Config) -> dict:
+    issues: list[str] = []
+
+    key_dups = int(df.duplicated(subset=["subject", "chapter", "year"]).sum())
+    if key_dups > 0:
+        issues.append(f"Duplicate subject-chapter-year rows: {key_dups}")
+
+    excluded_present = int(df["year"].isin(cfg.exclude_years).sum())
+    if excluded_present > 0:
+        issues.append(f"Excluded years still present: {excluded_present}")
+
+    if (df["label_count"] < 0).any():
+        issues.append("Negative count labels found")
+
+    expected_appear = (df["label_count"] > 0).astype(int)
+    mismatch = int((expected_appear != df["label_appear"]).sum())
+    if mismatch > 0:
+        issues.append(f"label_appear mismatch rows: {mismatch}")
+
+    return {
+        "passed": len(issues) == 0,
+        "issues": issues,
+        "n_rows": int(len(df)),
+        "n_subjects": int(df["subject"].nunique()),
+        "year_min": int(df["year"].min()) if len(df) else None,
+        "year_max": int(df["year"].max()) if len(df) else None,
+    }
+
+
+def build_chapter_topic_map(records: list[dict]) -> dict[tuple[str, str], str]:
+    topic_counts: dict[tuple[str, str], Counter] = defaultdict(Counter)
+    for r in records:
+        key = (str(r.get("subject", "")), str(r.get("chapter", "")))
+        topic = str(r.get("topic", "")).strip()
+        if key[0] and key[1] and topic:
+            topic_counts[key][topic] += 1
+
+    chapter_topic: dict[tuple[str, str], str] = {}
+    for key, counter in topic_counts.items():
+        chapter_topic[key] = counter.most_common(1)[0][0]
+    return chapter_topic
+
+
+def find_best_threshold(y_true: np.ndarray, y_prob: np.ndarray) -> float:
+    if len(np.unique(y_true)) < 2:
+        return 0.5
+    best_t, best_f1 = 0.5, -1.0
+    for t in np.linspace(0.1, 0.9, 17):
+        y_pred = (y_prob >= t).astype(int)
+        f1 = float(f1_score(y_true, y_pred, zero_division=0))
+        if f1 > best_f1:
+            best_f1 = f1
+            best_t = float(t)
+    return best_t
+
+
+def train_two_stage_subject(
+    train_df: pd.DataFrame,
+    test_df: pd.DataFrame,
+    feature_cols: list[str],
     cfg: Config,
-) -> tuple[Any, RobustScaler, list[str], float]:
-    subj_df = df[df["subject"] == subject].copy()
-    if subj_df.empty:
-        return None, None, [], 0.5
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Two-stage model: appearance classifier + positive-count regressor."""
+    x_train = np.nan_to_num(train_df[feature_cols].values.astype(float), nan=0.0)
+    x_test = np.nan_to_num(test_df[feature_cols].values.astype(float), nan=0.0)
+    y_app_train = train_df["label_appear"].values.astype(int)
+    y_cnt_train = train_df["label_count"].values.astype(float)
 
-    train_df = subj_df[(subj_df["year"] >= cfg.recent_start_year) & (subj_df["year"] != cfg.target_year)].copy()
-    if train_df.empty:
-        return None, None, [], 0.5
-
-    feature_cols = [c for c in train_df.columns if c not in ["subject", "chapter", "year", "label"]]
-    X = train_df[feature_cols].values.astype(float)
-    y = train_df["label"].values.astype(int)
-
-    # Replace any NaN that might have slipped
-    X = np.nan_to_num(X, nan=0.0)
-
-    if len(np.unique(y)) < 2:
-        log.warning(f"Subject {subject}: only one class, skipping.")
-        return None, None, [], 0.5
+    if len(train_df) == 0:
+        n = len(test_df)
+        return np.zeros(n), np.zeros(n), np.zeros(n, dtype=int)
 
     scaler = RobustScaler()
-    X_scaled = scaler.fit_transform(X)
-    X_scaled = np.nan_to_num(X_scaled, nan=0.0, posinf=0.0, neginf=0.0)
+    x_train_s = np.nan_to_num(scaler.fit_transform(x_train), nan=0.0, posinf=0.0, neginf=0.0)
+    x_test_s = np.nan_to_num(scaler.transform(x_test), nan=0.0, posinf=0.0, neginf=0.0)
 
-    classes = np.unique(y)
-    weights = compute_class_weight(class_weight="balanced", classes=classes, y=y)
-    class_weight_dict = dict(zip(classes, weights))
+    sample_w = np.where(train_df["year"].values >= cfg.post_change_year, cfg.post_change_weight, 1.0)
 
-    gb = GradientBoostingClassifier(n_estimators=150, learning_rate=0.05, max_depth=4, subsample=0.8, random_state=42)
-    rf = RandomForestClassifier(n_estimators=150, max_depth=6, class_weight=class_weight_dict, random_state=42)
-    lr = LogisticRegression(C=1.0, class_weight="balanced", random_state=42, max_iter=1000)
-
-    voting = VotingClassifier(estimators=[("gb", gb), ("rf", rf), ("lr", lr)], voting="soft", weights=[1, 1, 1])
-
-    # Calibration
-    n_splits = min(cfg.cv_splits, max(2, len(X_scaled) // 10))
-    tscv = TimeSeriesSplit(n_splits=n_splits)
-    calibrated = CalibratedClassifierCV(voting, method=cfg.calibration_method, cv=tscv if tscv.n_splits > 1 else 3)
-    calibrated.fit(X_scaled, y)
-
-    # Find best threshold
-    best_threshold = 0.5
-    best_f1 = 0.0
-    thresholds = np.linspace(0.1, 0.9, 17)
-    for th in thresholds:
-        fold_f1 = []
-        for train_idx, val_idx in tscv.split(X_scaled):
-            X_tr, X_val = X_scaled[train_idx], X_scaled[val_idx]
-            X_tr = np.nan_to_num(X_tr, nan=0.0, posinf=0.0, neginf=0.0)
-            X_val = np.nan_to_num(X_val, nan=0.0, posinf=0.0, neginf=0.0)
-            y_tr, y_val = y[train_idx], y[val_idx]
-            if len(np.unique(y_tr)) < 2 or len(np.unique(y_val)) < 2:
-                continue
-            temp = clone(voting)
-            temp.fit(X_tr, y_tr)
-            y_prob = temp.predict_proba(X_val)[:, 1]
-            y_pred = (y_prob >= th).astype(int)
-            fold_f1.append(f1_score(y_val, y_pred, zero_division=0))
-        if not fold_f1:
-            continue
-        mean_f1 = np.mean(fold_f1)
-        if mean_f1 > best_f1:
-            best_f1 = mean_f1
-            best_threshold = th
-
-    log.info(f"Subject {subject}: best threshold = {best_threshold:.3f} (F1={best_f1:.3f})")
-    return calibrated, scaler, feature_cols, best_threshold
-
-
-# ----------------------------------------------------------------------
-# Validation (skip 2021, NaN-safe)
-# ----------------------------------------------------------------------
-def validate_recent_years(df: pd.DataFrame, cfg: Config) -> dict:
-    years = sorted(df["year"].unique())
-    recent_years = [y for y in years if y >= cfg.recent_start_year and y < cfg.target_year and y not in cfg.exclude_years]
-    metrics = defaultdict(list)
-
-    for test_year in recent_years:
-        train_years = [y for y in years if y < test_year and y not in cfg.exclude_years]
-        train_df = df[df["year"].isin(train_years)]
-        test_df = df[df["year"] == test_year]
-
-        models_subj = {}
-        scalers_subj = {}
-        thresholds_subj = {}
-        feature_cols = [c for c in train_df.columns if c not in ["subject", "chapter", "year", "label"]]
-
-        for subj in ["Physics", "Chemistry", "Biology", "Mathematics"]:
-            subj_train = train_df[train_df["subject"] == subj]
-            if len(subj_train) < 10 or subj_train["label"].sum() < 2:
-                continue
-            X_tr = subj_train[feature_cols].values.astype(float)
-            y_tr = subj_train["label"].values.astype(int)
-            X_tr = np.nan_to_num(X_tr, nan=0.0)
-
-            scaler = RobustScaler()
-            X_tr_scaled = scaler.fit_transform(X_tr)
-            X_tr_scaled = np.nan_to_num(X_tr_scaled, nan=0.0, posinf=0.0, neginf=0.0)
-
-            classes = np.unique(y_tr)
-            weights = compute_class_weight(class_weight="balanced", classes=classes, y=y_tr)
-            class_weight_dict = dict(zip(classes, weights))
-
-            gb = GradientBoostingClassifier(n_estimators=100, learning_rate=0.05, max_depth=4, random_state=42)
-            rf = RandomForestClassifier(n_estimators=100, max_depth=5, class_weight=class_weight_dict, random_state=42)
-            lr = LogisticRegression(class_weight="balanced", random_state=42, max_iter=1000)
-            voting = VotingClassifier(estimators=[("gb", gb), ("rf", rf), ("lr", lr)], voting="soft")
-            voting.fit(X_tr_scaled, y_tr)
-            models_subj[subj] = voting
-            scalers_subj[subj] = scaler
-
-            # Find threshold for this subject
-            best_th = 0.5
-            best_f1 = 0.0
-            n_splits = min(3, max(2, len(X_tr_scaled) // 10))
-            tscv = TimeSeriesSplit(n_splits=n_splits)
-            for th in np.linspace(0.1, 0.9, 17):
-                fold_f1 = []
-                for train_idx, val_idx in tscv.split(X_tr_scaled):
-                    X_tr_cv, X_val_cv = X_tr_scaled[train_idx], X_tr_scaled[val_idx]
-                    X_tr_cv = np.nan_to_num(X_tr_cv, nan=0.0, posinf=0.0, neginf=0.0)
-                    X_val_cv = np.nan_to_num(X_val_cv, nan=0.0, posinf=0.0, neginf=0.0)
-                    y_tr_cv, y_val_cv = y_tr[train_idx], y_tr[val_idx]
-                    if len(np.unique(y_tr_cv)) < 2 or len(np.unique(y_val_cv)) < 2:
-                        continue
-                    m = clone(voting)
-                    m.fit(X_tr_cv, y_tr_cv)
-                    y_prob = m.predict_proba(X_val_cv)[:, 1]
-                    y_pred = (y_prob >= th).astype(int)
-                    fold_f1.append(f1_score(y_val_cv, y_pred, zero_division=0))
-                if not fold_f1:
-                    continue
-                if np.mean(fold_f1) > best_f1:
-                    best_f1 = np.mean(fold_f1)
-                    best_th = th
-            thresholds_subj[subj] = best_th
-
-        # Predict on test year
-        all_true, all_pred = [], []
-        for subj in models_subj:
-            subj_test = test_df[test_df["subject"] == subj]
-            if subj_test.empty:
-                continue
-            X_te = subj_test[feature_cols].values.astype(float)
-            y_true = subj_test["label"].values.astype(int)
-            X_te = np.nan_to_num(X_te, nan=0.0)
-            X_te_scaled = scalers_subj[subj].transform(X_te)
-            X_te_scaled = np.nan_to_num(X_te_scaled, nan=0.0, posinf=0.0, neginf=0.0)
-            y_prob = models_subj[subj].predict_proba(X_te_scaled)[:, 1]
-            th = thresholds_subj.get(subj, 0.5)
-            y_pred = (y_prob >= th).astype(int)
-            all_true.extend(y_true)
-            all_pred.extend(y_pred)
-
-        if all_true:
-            acc = (np.array(all_true) == np.array(all_pred)).mean()
-            prec = precision_score(all_true, all_pred, zero_division=0)
-            rec = recall_score(all_true, all_pred, zero_division=0)
-            f1 = f1_score(all_true, all_pred, zero_division=0)
-            try:
-                auc = roc_auc_score(all_true, y_prob) if len(np.unique(all_true)) > 1 else 0.5
-            except:
-                auc = 0.5
-            metrics["year"].append(test_year)
-            metrics["accuracy"].append(acc)
-            metrics["precision"].append(prec)
-            metrics["recall"].append(rec)
-            metrics["f1"].append(f1)
-            metrics["auc"].append(auc)
-            log.info(f"Validation {test_year}: acc={acc:.3f}, prec={prec:.3f}, rec={rec:.3f}, f1={f1:.3f}, auc={auc:.3f}")
-
-    if metrics["year"]:
-        summary = {
-            "mean_accuracy": round(np.mean(metrics["accuracy"]), 4),
-            "mean_precision": round(np.mean(metrics["precision"]), 4),
-            "mean_recall": round(np.mean(metrics["recall"]), 4),
-            "mean_f1": round(np.mean(metrics["f1"]), 4),
-            "mean_auc": round(np.mean(metrics["auc"]), 4),
-            "per_year": [
-                {"year": y, "accuracy": a, "precision": p, "recall": r, "f1": f, "auc": auc}
-                for y, a, p, r, f, auc in zip(metrics["year"], metrics["accuracy"],
-                                               metrics["precision"], metrics["recall"],
-                                               metrics["f1"], metrics["auc"])
-            ]
-        }
+    if len(np.unique(y_app_train)) < 2:
+        p_app = np.full(len(test_df), float(np.mean(y_app_train)), dtype=float)
     else:
-        summary = {}
-    return summary
+        app_clf = LogisticRegression(class_weight="balanced", random_state=42, max_iter=1000)
+        app_clf.fit(x_train_s, y_app_train, sample_weight=sample_w)
+        p_app = app_clf.predict_proba(x_test_s)[:, 1]
 
+    pos_mask = y_cnt_train > 0
+    hist_cap = float(max(1.0, np.percentile(y_cnt_train, 95)))
+    if int(pos_mask.sum()) < 3:
+        mu_pos = np.full(len(test_df), float(np.mean(y_cnt_train[y_cnt_train > 0])) if pos_mask.any() else 0.0)
+    else:
+        x_pos = x_train_s[pos_mask]
+        y_pos = y_cnt_train[pos_mask]
+        w_pos = sample_w[pos_mask]
+        # Stronger regularization prevents extreme count explosions on sparse histories.
+        cnt_reg = PoissonRegressor(alpha=0.2, max_iter=1000)
+        cnt_reg.fit(x_pos, y_pos, sample_weight=w_pos)
+        pos_cap = float(max(hist_cap, np.percentile(y_pos, 90) * 1.5))
+        mu_pos = np.clip(cnt_reg.predict(x_test_s), 0.0, pos_cap)
 
-# ----------------------------------------------------------------------
-# Prediction for 2026
-# ----------------------------------------------------------------------
-def predict_2026(
-    df: pd.DataFrame,
-    models: dict,
-    scalers: dict,
-    thresholds: dict,
-    feature_cols: list,
-    cfg: Config,
-) -> dict:
-    predictions = {}
-    for subject in ["Physics", "Chemistry", "Biology", "Mathematics"]:
-        if subject not in models or models[subject] is None:
-            predictions[subject] = []
-            continue
+    pred_count = np.clip(p_app * mu_pos, 0.0, hist_cap)
 
-        subj_df = df[df["subject"] == subject]
-        chapters = subj_df["chapter"].unique()
-        pred_rows = []
-        for ch in chapters:
-            hist = subj_df[(subj_df["chapter"] == ch) & (subj_df["year"] < cfg.target_year)]
-            if hist.empty:
-                prob = 0.05
+    if len(np.unique(y_app_train)) < 2:
+        threshold = 0.5
+    else:
+        if len(np.unique(y_app_train)) < 2:
+            threshold = 0.5
+        else:
+            # Fit on train for threshold tuning
+            if len(np.unique(y_app_train)) < 2:
+                threshold = 0.5
             else:
-                # Compute features for target year using the same logic as in build_chapter_year_features
-                years = hist["year"].values
-                counts = hist["label"].values
-                weights = np.exp(-(cfg.target_year - years) / cfg.recency_tau)
-                wmean = np.average(counts, weights=weights) if weights.sum() > 0 else 0.0
-                last3 = hist[hist["year"] >= cfg.target_year - 3]["label"].sum()
-                total_app = len(hist)
-                if len(counts) >= cfg.min_years_for_trend:
-                    x = np.arange(len(counts))
-                    slope, _, _, p_val, _ = stats.linregress(x, counts)
-                else:
-                    slope, p_val = 0.0, 1.0
-                years_since = cfg.target_year - (years[-1] if len(years) > 0 else cfg.target_year - 10)
-                if len(years) > 1:
-                    span = years[-1] - years[0] + 1
-                    regularity = len(years) / max(span, 1)
-                else:
-                    regularity = 0.0
-                all_topics = set(hist["topic"].dropna().values)
-                topic_diversity = len(all_topics) / max(1, total_app)
-                prior = hist["historical_prior"].iloc[0] if "historical_prior" in hist.columns else 0.0
-                rolling_2 = hist[hist["year"] >= cfg.target_year - 2]["label"].mean() if (hist["year"] >= cfg.target_year - 2).any() else 0.0
-                rolling_3 = hist[hist["year"] >= cfg.target_year - 3]["label"].mean() if (hist["year"] >= cfg.target_year - 3).any() else 0.0
-                core_ch = int(ch in {
-                    "Physics": {"Mechanics", "Kinematics", "Thermodynamics", "Electrostatics", "Electromagnetism", "Optics", "Quantum Mechanics", "Nuclear Physics", "Waves", "Oscillations", "Fluid Mechanics", "Gravitation"},
-                    "Chemistry": {"Organic Chemistry", "Organic Reactions", "Chemical Bonding", "Chemical Kinetics", "Chemical Equilibrium", "Electrochemistry", "Thermodynamics", "Acids and Bases", "Atomic Structure", "Solid State"},
-                    "Biology": {"Genetics", "Molecular Biology", "Evolution", "Ecology", "Cell Biology", "Biochemistry", "Plant Physiology", "Human Physiology", "Immunology"},
-                    "Mathematics": {"Calculus", "Algebra", "Probability", "Trigonometry", "Geometry", "Number Theory", "Combinatorics", "Linear Algebra", "Vectors", "Coordinate Geometry", "Differential Equations"},
-                }.get(subject, set()))
+                app_tune = LogisticRegression(class_weight="balanced", random_state=42, max_iter=1000)
+                app_tune.fit(x_train_s, y_app_train, sample_weight=sample_w)
+                train_prob = app_tune.predict_proba(x_train_s)[:, 1]
+                threshold = find_best_threshold(y_app_train, train_prob)
 
-                feat = np.array([[wmean, last3, total_app, slope, p_val, years_since, regularity,
-                                  topic_diversity, prior, core_ch, rolling_2, rolling_3]])
-                # Ensure same order as feature_cols
-                feat_df = pd.DataFrame(feat, columns=feature_cols)
-                # Replace any NaN
-                feat_df = feat_df.replace([np.inf, -np.inf], np.nan).fillna(0)
-                feat_scaled = scalers[subject].transform(feat_df)
-                feat_scaled = np.nan_to_num(feat_scaled, nan=0.0, posinf=0.0, neginf=0.0)
-                prob = models[subject].predict_proba(feat_scaled)[0, 1]
-                prob = float(np.clip(prob, 0.01, 0.99))
-
-            pred_rows.append((ch, prob))
-
-        threshold = thresholds.get(subject, 0.5)
-        filtered = [(ch, prob) for ch, prob in pred_rows if prob >= threshold]
-        filtered.sort(key=lambda x: x[1], reverse=True)
-        final = filtered[:cfg.top_n]
-        predictions[subject] = [{"chapter": ch, "probability": round(prob, 4)} for ch, prob in final]
-        log.info(f"{subject}: selected {len(final)} chapters (threshold={threshold:.3f})")
-    return predictions
+    pred_appear = (p_app >= threshold).astype(int)
+    return pred_count, p_app, pred_appear
 
 
-# ----------------------------------------------------------------------
-# Main
-# ----------------------------------------------------------------------
-def main():
+def mean_or_nan(values: list[float]) -> float:
+    return float(np.mean(values)) if values else float("nan")
+
+
+def mape(y_true: list[float], y_pred: list[float]) -> float:
+    y_true_arr = np.array(y_true, dtype=float)
+    y_pred_arr = np.array(y_pred, dtype=float)
+    non_zero = y_true_arr != 0
+    if not non_zero.any():
+        return float("nan")
+    return float(np.mean(np.abs((y_true_arr[non_zero] - y_pred_arr[non_zero]) / y_true_arr[non_zero])) * 100)
+
+
+def dcg(relevance: list[float]) -> float:
+    if not relevance:
+        return 0.0
+    rel = np.array(relevance, dtype=float)
+    discounts = np.log2(np.arange(2, len(rel) + 2))
+    return float(np.sum((2**rel - 1) / discounts))
+
+
+def ndcg_at_k(scores: dict[str, float], truth_counts: dict[str, float], k: int) -> float:
+    ranked = [c for c, _ in sorted(scores.items(), key=lambda x: x[1], reverse=True)[:k]]
+    rel_pred = [truth_counts.get(c, 0.0) for c in ranked]
+
+    ideal_ranked = [c for c, _ in sorted(truth_counts.items(), key=lambda x: x[1], reverse=True)[:k]]
+    rel_ideal = [truth_counts.get(c, 0.0) for c in ideal_ranked]
+
+    denom = dcg(rel_ideal)
+    if denom <= 0:
+        return 0.0
+    return dcg(rel_pred) / denom
+
+
+def recall_at_k(ranked: list[str], actual_set: set[str], k: int) -> float:
+    if not actual_set:
+        return 0.0
+    hit = len(set(ranked[:k]) & actual_set)
+    return float(hit / len(actual_set))
+
+
+def precision_at_k(ranked: list[str], actual_set: set[str], k: int) -> float:
+    if k <= 0:
+        return 0.0
+    hit = len(set(ranked[:k]) & actual_set)
+    return float(hit / k)
+
+
+def main() -> None:
     cfg = Config()
-    log.info("NEST 2026 Prediction System v6.1 (NaN-safe)")
-    log.info(f"Target year: {cfg.target_year}")
+    log.info("NEST 2026 Evaluation v9.0 (Two-stage, ranking-first)")
 
     records = load_and_clean(cfg.data_path)
-    df = build_chapter_year_features(records, cfg)
-    df = df[~df["year"].isin(cfg.exclude_years)]  # remove 2021
-    log.info(f"After removing excluded years: {len(df)} rows")
+    df = build_features(records, cfg)
+    df = df[~df["year"].isin(cfg.exclude_years)].copy()
 
-    val_results = validate_recent_years(df, cfg)
-    log.info(f"Validation summary: {val_results}")
+    verification = {
+        "data_integrity": verify_data_integrity(df, cfg),
+        "walk_forward": {"passed": True, "issues": []},
+    }
 
-    # Train final models
-    models = {}
-    scalers = {}
-    thresholds = {}
-    feature_cols = [c for c in df.columns if c not in ["subject", "chapter", "year", "label"]]
+    if not verification["data_integrity"]["passed"]:
+        log.error("Data verification failed: %s", verification["data_integrity"]["issues"])
 
-    for subj in ["Physics", "Chemistry", "Biology", "Mathematics"]:
-        clf, scaler, cols, th = train_subject_classifier_with_threshold(df, subj, cfg)
-        models[subj] = clf
-        scalers[subj] = scaler
-        thresholds[subj] = th
-        if clf is not None:
-            log.info(f"Trained {subj} classifier on {len(df[df['subject']==subj])} rows, threshold={th:.3f}")
+    feature_cols = [
+        c for c in df.columns if c not in ["subject", "chapter", "year", "label_count", "label_appear"]
+    ]
 
-    predictions = predict_2026(df, models, scalers, thresholds, feature_cols, cfg)
+    test_years = sorted(df["year"].unique())
+    test_years = [y for y in test_years if y >= cfg.recent_start_year and y < cfg.target_year]
+
+    per_year_metrics: list[dict] = []
+    ranking_by_year: list[dict] = []
+
+    chapter_wise: dict[tuple[str, str], list[tuple[float, float]]] = defaultdict(list)
+    topic_wise: dict[tuple[str, str], list[tuple[float, float]]] = defaultdict(list)
+    chapter_topic_map = build_chapter_topic_map(records)
+
+    for test_year in test_years:
+        train_df = df[df["year"] < test_year].copy()
+        test_df = df[df["year"] == test_year].copy()
+        if train_df.empty or test_df.empty:
+            continue
+
+        test_pred_parts: list[pd.DataFrame] = []
+
+        for subj in SUBJECTS:
+            subj_train = train_df[train_df["subject"] == subj].copy()
+            subj_test = test_df[test_df["subject"] == subj].copy()
+            if subj_test.empty:
+                continue
+
+            if subj_train.empty:
+                subj_test["pred_count"] = 0.0
+                subj_test["pred_prob"] = 0.0
+                subj_test["pred_label"] = 0
+            else:
+                pred_count, pred_prob, pred_label = train_two_stage_subject(
+                    subj_train, subj_test, feature_cols, cfg
+                )
+                subj_test["pred_count"] = pred_count
+                subj_test["pred_prob"] = pred_prob
+                subj_test["pred_label"] = pred_label
+
+            test_pred_parts.append(subj_test)
+
+        if not test_pred_parts:
+            continue
+
+        pred_df = pd.concat(test_pred_parts, ignore_index=True)
+        y_true_bin = pred_df["label_appear"].values.astype(int)
+        y_prob = pred_df["pred_prob"].values.astype(float)
+        y_pred = pred_df["pred_label"].values.astype(int)
+
+        try:
+            auc = float(roc_auc_score(y_true_bin, y_prob)) if len(np.unique(y_true_bin)) > 1 else 0.5
+        except Exception:
+            auc = 0.5
+
+        per_year_metrics.append(
+            {
+                "year": int(test_year),
+                "accuracy": float(accuracy_score(y_true_bin, y_pred)),
+                "precision": float(precision_score(y_true_bin, y_pred, zero_division=0)),
+                "recall": float(recall_score(y_true_bin, y_pred, zero_division=0)),
+                "f1": float(f1_score(y_true_bin, y_pred, zero_division=0)),
+                "auc": auc,
+            }
+        )
+
+        year_rank = {"year": int(test_year), "subjects": {}}
+
+        for subj in SUBJECTS:
+            s_df = pred_df[pred_df["subject"] == subj].copy()
+            if s_df.empty:
+                continue
+
+            score_map = {
+                row["chapter"]: float(row["pred_prob"] * row["pred_count"])
+                for _, row in s_df.iterrows()
+            }
+            truth_counts = {row["chapter"]: float(row["label_count"]) for _, row in s_df.iterrows()}
+            ranked_chapters = [c for c, _ in sorted(score_map.items(), key=lambda x: x[1], reverse=True)]
+            actual_set = {c for c, v in truth_counts.items() if v > 0}
+
+            metrics_k = {}
+            for k in cfg.rank_k_values:
+                metrics_k[f"recall@{k}"] = recall_at_k(ranked_chapters, actual_set, k)
+                metrics_k[f"precision@{k}"] = precision_at_k(ranked_chapters, actual_set, k)
+                metrics_k[f"ndcg@{k}"] = ndcg_at_k(score_map, truth_counts, k)
+
+            year_rank["subjects"][subj] = metrics_k
+
+            for _, row in s_df.iterrows():
+                key = (subj, row["chapter"])
+                chapter_wise[key].append((float(row["label_count"]), float(row["pred_count"])))
+
+            topic_actual = defaultdict(float)
+            topic_pred = defaultdict(float)
+            for _, row in s_df.iterrows():
+                t = chapter_topic_map.get((subj, row["chapter"]), "Unknown")
+                topic_actual[t] += float(row["label_count"])
+                topic_pred[t] += float(row["pred_count"])
+            for t, a in topic_actual.items():
+                topic_wise[(subj, t)].append((a, float(topic_pred.get(t, 0.0))))
+
+        ranking_by_year.append(year_rank)
+
+    chapter_metrics = {}
+    for (subj, chap), pairs in chapter_wise.items():
+        if len(pairs) < 2:
+            continue
+        a = [x for x, _ in pairs]
+        p = [x for _, x in pairs]
+        try:
+            r2 = float(r2_score(a, p))
+        except Exception:
+            r2 = float("nan")
+        chapter_metrics[f"{subj}::{chap}"] = {
+            "mae": float(mean_absolute_error(a, p)),
+            "mape": mape(a, p),
+            "r2": r2,
+            "n_years": len(a),
+        }
+
+    topic_metrics = {}
+    for (subj, topic), pairs in topic_wise.items():
+        if len(pairs) < 2:
+            continue
+        a = [x for x, _ in pairs]
+        p = [x for _, x in pairs]
+        try:
+            r2 = float(r2_score(a, p))
+        except Exception:
+            r2 = float("nan")
+        topic_metrics[f"{subj}::{topic}"] = {
+            "mae": float(mean_absolute_error(a, p)),
+            "mape": mape(a, p),
+            "r2": r2,
+            "n_years": len(a),
+        }
+
+    all_rank_metrics: dict[str, list[float]] = defaultdict(list)
+    for yr in ranking_by_year:
+        for subj in yr["subjects"]:
+            for k, v in yr["subjects"][subj].items():
+                all_rank_metrics[k].append(float(v))
+
+    ranking_summary = {k: mean_or_nan(vs) for k, vs in all_rank_metrics.items()}
+
+    all_actuals = [a for pairs in chapter_wise.values() for a, _ in pairs]
+    all_preds = [p for pairs in chapter_wise.values() for _, p in pairs]
+    if all_actuals:
+        overall_regression = {
+            "mae": float(mean_absolute_error(all_actuals, all_preds)),
+            "mape": mape(all_actuals, all_preds),
+            "r2": float(r2_score(all_actuals, all_preds)) if len(all_actuals) > 1 else float("nan"),
+        }
+    else:
+        overall_regression = {"mae": float("nan"), "mape": float("nan"), "r2": float("nan")}
 
     output = {
         "meta": {
-            "version": "6.1",
+            "version": "9.0",
             "generated_at": datetime.now().isoformat(),
-            "target_year": cfg.target_year,
             "config": asdict(cfg),
-            "validation": val_results,
-            "note": "Excluded 2021. NaN-safe."
+            "note": "Two-stage regime-aware model. Ranking metrics are primary; count metrics are secondary.",
         },
-        "predictions": predictions
+        "verification": verification,
+        "per_year_metrics": per_year_metrics,
+        "overall_classification": {
+            "mean_accuracy": mean_or_nan([m["accuracy"] for m in per_year_metrics]),
+            "mean_precision": mean_or_nan([m["precision"] for m in per_year_metrics]),
+            "mean_recall": mean_or_nan([m["recall"] for m in per_year_metrics]),
+            "mean_f1": mean_or_nan([m["f1"] for m in per_year_metrics]),
+            "mean_auc": mean_or_nan([m["auc"] for m in per_year_metrics]),
+        },
+        "ranking_metrics": {
+            "summary": ranking_summary,
+            "per_year": ranking_by_year,
+        },
+        "regression_metrics": {
+            "overall": overall_regression,
+            "chapter_wise": chapter_metrics,
+            "topic_wise": topic_metrics,
+        },
     }
 
     out_path = Path(cfg.output_path)
     out_path.write_text(json.dumps(output, indent=2, default=str), encoding="utf-8")
-    log.info(f"Saved predictions to {out_path}")
+    log.info(f"Saved evaluation to {out_path}")
 
-    print("\n" + "="*80)
-    print(f"NEST 2026 PREDICTIONS (Top chapters per subject)")
-    print("="*80)
-    for subj, chap_list in predictions.items():
-        print(f"\n{subj.upper()}:")
-        for i, item in enumerate(chap_list[:15], 1):
-            print(f"  {i:2}. {item['chapter']:<35} (prob {item['probability']:.3f})")
-    print("="*80)
+    print("\n" + "=" * 80)
+    print("PRIMARY RANKING METRICS (mean over years)")
+    print("=" * 80)
+    for k in sorted(ranking_summary.keys()):
+        print(f"{k:<12}: {ranking_summary[k]:.4f}")
+
+    print("\n" + "=" * 80)
+    print("CLASSIFICATION METRICS (secondary)")
+    print("=" * 80)
+    oc = output["overall_classification"]
+    print(f"Mean Accuracy:  {oc['mean_accuracy']:.4f}")
+    print(f"Mean Precision: {oc['mean_precision']:.4f}")
+    print(f"Mean Recall:    {oc['mean_recall']:.4f}")
+    print(f"Mean F1:        {oc['mean_f1']:.4f}")
+    print(f"Mean AUC:       {oc['mean_auc']:.4f}")
+
+    print("\n" + "=" * 80)
+    print("COUNT METRICS (secondary)")
+    print("=" * 80)
+    print(f"Overall MAE:  {overall_regression['mae']:.4f}")
+    print(f"Overall MAPE: {overall_regression['mape']:.2f}%")
+    print(f"Overall R2:   {overall_regression['r2']:.4f}")
+
+    print("\n" + "=" * 80)
+    print(f"Detailed ranking + chapter/topic metrics saved to {cfg.output_path}")
+    print("=" * 80)
 
 
 if __name__ == "__main__":

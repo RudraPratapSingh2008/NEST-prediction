@@ -1,0 +1,325 @@
+{
+  "meta": {
+    "version": "6.1",
+    "generated_at": "2026-04-04T00:30:05.824443",
+    "target_year": 2026,
+    "config": {
+      "data_path": "all_merged_cleaned (new).json",
+      "target_year": 2026,
+      "min_appearances": 2,
+      "min_years_for_trend": 3,
+      "recency_tau": 3.0,
+      "rolling_windows": [
+        2,
+        3
+      ],
+      "recent_start_year": 2020,
+      "exclude_years": [
+        2021
+      ],
+      "cv_splits": 3,
+      "calibration_method": "sigmoid",
+      "top_n": 20,
+      "output_path": "nest2026_predictions_v6.json"
+    },
+    "validation": {
+      "mean_accuracy": 0.6723,
+      "mean_precision": 0.6227,
+      "mean_recall": 0.8524,
+      "mean_f1": 0.7165,
+      "mean_auc": 0.5,
+      "per_year": [
+        {
+          "year": "2020",
+          "accuracy": 0.7,
+          "precision": 0.7017543859649122,
+          "recall": 0.851063829787234,
+          "f1": 0.7692307692307693,
+          "auc": 0.5
+        },
+        {
+          "year": "2022",
+          "accuracy": 0.6781609195402298,
+          "precision": 0.6885245901639344,
+          "recall": 0.8235294117647058,
+          "f1": 0.75,
+          "auc": 0.5
+        },
+        {
+          "year": "2023",
+          "accuracy": 0.6041666666666666,
+          "precision": 0.5972222222222222,
+          "recall": 0.8269230769230769,
+          "f1": 0.6935483870967742,
+          "auc": 0.5
+        },
+        {
+          "year": "2024",
+          "accuracy": 0.6391752577319587,
+          "precision": 0.5079365079365079,
+          "recall": 0.8888888888888888,
+          "f1": 0.6464646464646465,
+          "auc": 0.5
+        },
+        {
+          "year": "2025",
+          "accuracy": 0.74,
+          "precision": 0.6181818181818182,
+          "recall": 0.8717948717948718,
+          "f1": 0.723404255319149,
+          "auc": 0.5
+        }
+      ]
+    },
+    "note": "Excluded 2021. NaN-safe."
+  },
+  "predictions": {
+    "Physics": [
+      {
+        "chapter": "Optics",
+        "probability": 0.7293
+      },
+      {
+        "chapter": "Electromagnetism",
+        "probability": 0.7278
+      },
+      {
+        "chapter": "Electrostatics",
+        "probability": 0.7222
+      },
+      {
+        "chapter": "Waves",
+        "probability": 0.7216
+      },
+      {
+        "chapter": "Quantum Mechanics",
+        "probability": 0.7209
+      },
+      {
+        "chapter": "Thermodynamics",
+        "probability": 0.7202
+      },
+      {
+        "chapter": "Mechanics",
+        "probability": 0.7195
+      },
+      {
+        "chapter": "Nuclear Physics",
+        "probability": 0.7148
+      },
+      {
+        "chapter": "Semiconductors",
+        "probability": 0.6738
+      },
+      {
+        "chapter": "Fluid Mechanics",
+        "probability": 0.6622
+      },
+      {
+        "chapter": "Oscillations",
+        "probability": 0.6416
+      },
+      {
+        "chapter": "Magnetism",
+        "probability": 0.6378
+      },
+      {
+        "chapter": "Kinematics",
+        "probability": 0.635
+      },
+      {
+        "chapter": "Kinetic Theory",
+        "probability": 0.6339
+      },
+      {
+        "chapter": "Statistics",
+        "probability": 0.6324
+      },
+      {
+        "chapter": "Work, Energy and Power",
+        "probability": 0.6299
+      },
+      {
+        "chapter": "Units and Dimensions",
+        "probability": 0.6199
+      },
+      {
+        "chapter": "Electromagnetic Waves",
+        "probability": 0.6013
+      },
+      {
+        "chapter": "Gravitation",
+        "probability": 0.5993
+      },
+      {
+        "chapter": "Astrophysics",
+        "probability": 0.5784
+      }
+    ],
+    "Chemistry": [
+      {
+        "chapter": "Organic Chemistry",
+        "probability": 0.4214
+      },
+      {
+        "chapter": "Thermodynamics",
+        "probability": 0.4133
+      },
+      {
+        "chapter": "Chemical Bonding",
+        "probability": 0.409
+      },
+      {
+        "chapter": "Atomic Structure",
+        "probability": 0.3766
+      },
+      {
+        "chapter": "Chemical Kinetics",
+        "probability": 0.3753
+      },
+      {
+        "chapter": "General Chemistry",
+        "probability": 0.3722
+      },
+      {
+        "chapter": "Electrochemistry",
+        "probability": 0.3685
+      },
+      {
+        "chapter": "Coordination Chemistry",
+        "probability": 0.3621
+      },
+      {
+        "chapter": "Chemical Equilibrium",
+        "probability": 0.3423
+      },
+      {
+        "chapter": "Acids and Bases",
+        "probability": 0.3386
+      },
+      {
+        "chapter": "Solutions",
+        "probability": 0.3263
+      },
+      {
+        "chapter": "Metallurgy",
+        "probability": 0.3211
+      },
+      {
+        "chapter": "Ionic Equilibrium",
+        "probability": 0.3043
+      },
+      {
+        "chapter": "Inorganic Chemistry",
+        "probability": 0.3009
+      },
+      {
+        "chapter": "Solid State",
+        "probability": 0.2974
+      },
+      {
+        "chapter": "p-Block Elements",
+        "probability": 0.2915
+      },
+      {
+        "chapter": "Magnetism",
+        "probability": 0.2766
+      },
+      {
+        "chapter": "Biomolecules",
+        "probability": 0.2756
+      },
+      {
+        "chapter": "Nuclear Chemistry",
+        "probability": 0.2574
+      },
+      {
+        "chapter": "Periodic Table",
+        "probability": 0.2547
+      }
+    ],
+    "Biology": [],
+    "Mathematics": [
+      {
+        "chapter": "Real Analysis",
+        "probability": 0.4143
+      },
+      {
+        "chapter": "Continuity and Differentiability",
+        "probability": 0.3939
+      },
+      {
+        "chapter": "Relations and Functions",
+        "probability": 0.3919
+      },
+      {
+        "chapter": "Logical Reasoning",
+        "probability": 0.3903
+      },
+      {
+        "chapter": "Polynomials",
+        "probability": 0.3884
+      },
+      {
+        "chapter": "Sequences and Series",
+        "probability": 0.3823
+      },
+      {
+        "chapter": "Quadratic Equations",
+        "probability": 0.3759
+      },
+      {
+        "chapter": "Mensuration",
+        "probability": 0.3738
+      },
+      {
+        "chapter": "Limits and Continuity",
+        "probability": 0.369
+      },
+      {
+        "chapter": "Permutations and Combinations",
+        "probability": 0.369
+      },
+      {
+        "chapter": "Conic Sections",
+        "probability": 0.3683
+      },
+      {
+        "chapter": "Limits",
+        "probability": 0.3608
+      },
+      {
+        "chapter": "Binomial Theorem",
+        "probability": 0.36
+      },
+      {
+        "chapter": "Trigonometry",
+        "probability": 0.3599
+      },
+      {
+        "chapter": "Ellipse",
+        "probability": 0.349
+      },
+      {
+        "chapter": "Set Theory",
+        "probability": 0.3466
+      },
+      {
+        "chapter": "Geometry",
+        "probability": 0.3466
+      },
+      {
+        "chapter": "Matrices",
+        "probability": 0.3428
+      },
+      {
+        "chapter": "Complex Numbers",
+        "probability": 0.3372
+      },
+      {
+        "chapter": "Vectors",
+        "probability": 0.3354
+      }
+    ]
+  }
+}
