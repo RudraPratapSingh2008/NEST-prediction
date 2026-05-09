@@ -1,0 +1,21 @@
+{
+  "name": "nest-prediction",
+  "version": "1.0.0",
+  "description": "NEST Intelligence Engine - Question prediction and analysis system",
+  "type": "module",
+  "scripts": {
+    "dev": "python -m http.server 8000",
+    "build": "echo 'Static HTML project - no build needed'"
+  },
+  "keywords": [
+    "nest",
+    "prediction",
+    "analytics",
+    "education"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@vercel/analytics": "^1.4.1"
+  }
+}
