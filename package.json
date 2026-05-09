@@ -16,6 +16,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@vercel/analytics": "^1.4.1"
+    "@vercel/analytics": "^1.6.1"
   }
 }

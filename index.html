@@ -2744,11 +2744,25 @@ function restartTest() {
 }
 
 /* ===== NAVIGATION ===== */
+function trackPageView(sectionId) {
+  if (typeof window.va !== 'function') return;
+
+  const path = sectionId
+    ? `${window.location.pathname}${window.location.search}#${sectionId}`
+    : `${window.location.pathname}${window.location.search}`;
+
+  window.va('pageview', {
+    route: sectionId ? `/${sectionId}` : window.location.pathname,
+    path
+  });
+}
+
 function showPage(id, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   if (btn) btn.classList.add('active');
+  trackPageView(id);
 }
 
 /* ===== BOOT ===== */
